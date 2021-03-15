@@ -1,0 +1,23 @@
+#conan profile new default --detect
+#conan install . --build=missing
+
+[requires]
+fmt/[>=7.1]
+spdlog/[>=1.4.1]
+glfw/3.3.3
+glew/2.2.0
+glm/0.9.9.8
+imgui/1.81
+
+[build_requires]
+fmt/[>=7.1]
+spdlog/[>=1.4.1]
+glfw/3.3.3
+glew/2.2.0
+glm/0.9.9.8
+imgui/1.81
+
+[generators]
+cmake
+cmake_find_package
+cmake_paths
