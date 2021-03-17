@@ -7,7 +7,6 @@ env:
   BUILD_TYPE: Release
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  BITRAY_KEY: ${{ secrets.BINTRAY_API_KEY }} 
 
 jobs:
   build:
@@ -20,11 +19,6 @@ jobs:
         
     - name: Packages
       shell: bash
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
-      # Note the current convention is to use the -S and -B options here to specify source 
-      # and build directories, but this is only available with CMake 3.13 and higher.  
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential git cmake curl libgl-dev libglu1-mesa-dev
@@ -52,8 +46,3 @@ jobs:
         curl -L -O https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.4.0.2170-linux.zip
         unzip sonar-scanner-cli-4.4.0.2170-linux.zip
         sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner
-        
-    - name: Bintray
-      shell: bash
-      run: |
-        curl -T bin/zxpaint -utwelvechairssoftware:$BITRAY_KEY https://api.bintray.com/content/twelvechairssoftware/Artifacts/zxpaint/0/zxpaint-debian
