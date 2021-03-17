@@ -6,7 +6,8 @@
 #define numVAOs 1
 
 GLuint renderingProgram;
-GLuint vao[numVAOs];
+GLuint vertexArrayObjects[numVAOs];
+
 static std::string glsl_version;
 
 void selectGLVersion(){
@@ -29,42 +30,42 @@ void selectGLVersion(){
 }
 
 GLuint createShaderProgram(){
-    std::string vShaderString =
+    std::string vertexShaderString =
             "void main(void) \n"
             "{gl_Position = vec4(0.0, 0.0, 0.0, 1.0);}";
-    vShaderString.insert(0, glsl_version);
-    const char* vShaderSource = vShaderString.c_str();
+    vertexShaderString.insert(0, glsl_version);
+    const char* vertexShaderSource = vertexShaderString.c_str();
 
-    std::string fShaderString =
+    std::string fragmentShaderString =
             "out vec4 color; \n"
             "void main(void) \n"
             "{color = vec4(0.0, 0.0, 1.0, 1.0);}";
-    fShaderString.insert(0, glsl_version);
-    const char* fShaderSource = fShaderString.c_str();
+    fragmentShaderString.insert(0, glsl_version);
+    const char* fragmentShaderSource = fragmentShaderString.c_str();
 
-    GLuint vfProgram = glCreateProgram();
+    GLuint shaderProgram = glCreateProgram();
 
-    GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    glShaderSource(vShader, 1, &vShaderSource, nullptr);
-    glCompileShader(vShader);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glCompileShader(vertexShader);
 
-    glShaderSource(fShader, 1, &fShaderSource, nullptr);\
-    glCompileShader(fShader);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);\
+    glCompileShader(fragmentShader);
 
-    glAttachShader(vfProgram, vShader);
-    glAttachShader(vfProgram, fShader);
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
 
-    glLinkProgram(vfProgram);
+    glLinkProgram(shaderProgram);
 
-    return vfProgram;
+    return shaderProgram;
 }
 
 void init(GLFWwindow* window) {
     renderingProgram = createShaderProgram();
-    glGenVertexArrays(numVAOs, vao);
-    glBindVertexArray(vao[0]);
+    glGenVertexArrays(numVAOs, vertexArrayObjects);
+    glBindVertexArray(vertexArrayObjects[0]);
 }
 
 void display(GLFWwindow* window, double currentTime){
