@@ -11,7 +11,7 @@ conan_basic_setup()
 
 add_executable(untitled
         src/main.cpp
-        include/imgui_impl_opengl3.cpp
-        include/imgui_impl_glfw.cpp)
-
+        src/imgui.cpp)
+#include/imgui_impl_opengl3.cpp
+#include/imgui_impl_glfw.cpp
 target_link_libraries(untitled PRIVATE ${CONAN_LIBS})
