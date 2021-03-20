@@ -1,5 +1,53 @@
 #include "common.h"
 
+void selectGLVersion(){
+#ifdef __APPLE__
+    glsl_version = "#version 330 \n";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint (GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#else
+    glsl_version = "#version 420 \n";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+}
+
+std::string readShaderSource(const char* filePath){
+    try {
+        spdlog::info(filePath);
+        std::ifstream sourceFile;
+        try {
+            sourceFile.open(filePath, std::fstream::in);
+        }
+        catch (std::exception &e){
+            spdlog::error("Error loading file: {}", e.what());
+        }
+        spdlog::info(sourceFile.exceptions());
+        std::string sourceCode = glsl_version;
+        std::string line;
+        if (!sourceFile){
+            spdlog::error("File not found");
+        }
+        while (!sourceFile.eof()){
+            getline(sourceFile, line);
+            spdlog::info(line);
+            sourceCode.append(line);
+        }
+        sourceFile.close();
+        spdlog::info(sourceCode);
+        return sourceCode;
+    }
+    catch (std::exception &e){
+        spdlog::error(e.what());
+        return glsl_version;
+    }
+}
+
+
 void printShaderLog(GLuint shader){
     int len = 0;
     int chWrittn = 0;
