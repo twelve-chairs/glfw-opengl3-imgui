@@ -16,30 +16,28 @@ void selectGLVersion(){
 #endif
 }
 
-std::string readShaderSource(const char* filePath){
+std::string readShaderSource(std::string filePath){
     try {
-        spdlog::info(filePath);
-        std::ifstream sourceFile;
-        try {
-            sourceFile.open(filePath, std::fstream::in);
+        spdlog::debug("Path: {} Exists: {}", filePath, std::filesystem::exists(filePath));
+
+        if (std::filesystem::exists(filePath)) {
+            std::ifstream sourceFile(filePath, std::ios::in);
+            spdlog::debug("Exceptions: {}", sourceFile.exceptions());
+
+            std::string sourceCode = glsl_version;
+            std::string line;
+
+            while (getline(sourceFile, line)) {
+                sourceCode.append(line + "\n");
+            }
+
+            sourceFile.close();
+            return sourceCode;
         }
-        catch (std::exception &e){
-            spdlog::error("Error loading file: {}", e.what());
+        else {
+            spdlog::error("File not found. {}", filePath);
+            return glsl_version;
         }
-        spdlog::info(sourceFile.exceptions());
-        std::string sourceCode = glsl_version;
-        std::string line;
-        if (!sourceFile){
-            spdlog::error("File not found");
-        }
-        while (!sourceFile.eof()){
-            getline(sourceFile, line);
-            spdlog::info(line);
-            sourceCode.append(line);
-        }
-        sourceFile.close();
-        spdlog::info(sourceCode);
-        return sourceCode;
     }
     catch (std::exception &e){
         spdlog::error(e.what());

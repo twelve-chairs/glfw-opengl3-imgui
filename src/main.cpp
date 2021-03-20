@@ -2,17 +2,19 @@
 
 
 GLuint createShaderProgram(){
-    auto vertexShaderSource = readShaderSource("vertexShader.glsl").c_str();
-    auto fragmentShaderSource = readShaderSource("fragmentShader.glsl").c_str();
+    std::string vertexShaderSource = readShaderSource("../../src/vertexShader.glsl");
+    std::string fragmentShaderSource = readShaderSource("../../src/fragmentShader.glsl");
+    const char* vertexShaderSourceString = vertexShaderSource.c_str();
+    const char* fragmentShaderSourceString = fragmentShaderSource.c_str();
 
     GLuint shaderProgram = glCreateProgram();
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glShaderSource(vertexShader, 1, &vertexShaderSourceString, nullptr);
     glCompileShader(vertexShader);
 
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);\
+    glShaderSource(fragmentShader, 1, &fragmentShaderSourceString, nullptr);\
     glCompileShader(fragmentShader);
 
     glAttachShader(shaderProgram, vertexShader);

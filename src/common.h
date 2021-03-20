@@ -22,7 +22,7 @@
 static std::string glsl_version;
 
 void selectGLVersion();
-std::string readShaderSource(const char* filePath);
+std::string readShaderSource(std::string filePath);
 void printShaderLog(GLuint shader);
 void printProgramLog(int prog);
 bool checkOpenGLError();
