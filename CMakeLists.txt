@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
 set(PROJECT_NAME "opengl")
-set(CMAKE_CONFIGURATION_TYPES "MinSizeRel; Debug" CACHE STRING "" FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;MinSizeRel" CACHE STRING "" FORCE)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 project(${PROJECT_NAME})

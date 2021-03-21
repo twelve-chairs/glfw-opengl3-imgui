@@ -16,7 +16,7 @@ void selectGLVersion(){
 #endif
 }
 
-std::string readSourceFile(std::string filePath){
+std::string readSourceFile(const std::string& filePath){
     try {
         spdlog::debug("Path: {} Exists: {}", filePath, std::filesystem::exists(filePath));
 
