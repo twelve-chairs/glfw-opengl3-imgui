@@ -32,7 +32,6 @@ void init(GLFWwindow* window) {
 }
 
 void display(GLFWwindow* window, double currentTime){
-
     glClear(GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -68,6 +67,7 @@ int main(int, char**){
     glfwMakeContextCurrent(window);
 
     // Initialize OpenGL loader
+    glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK){
         spdlog::error("Failed to initialize OpenGL loader!\n");
         return 1;

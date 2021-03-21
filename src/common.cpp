@@ -2,19 +2,19 @@
 
 void selectGLVersion(){
 #ifdef __APPLE__
-    glsl_version = "#version 330 \n";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint (GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#else
-    glsl_version = "#version 420 \n";
+    glsl_version = "#version 410 \n";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#else
+    glsl_version = "#version 430 \n";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 #endif
 }
+
 
 std::string readSourceFile(const std::string& filePath){
     try {
@@ -92,3 +92,52 @@ int randomInteger(int to, int from){
     return randomRange(randomEngine);
 }
 
+
+glm::mat4 buildTranslate(float x, float y, float z){
+    glm::mat4 trans = glm::mat4(
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            x, y, z, 1.0);
+    return trans;
+}
+
+
+glm::mat4 buildRotateX(float rad){
+    glm::mat4 xRot = glm::mat4(
+            1.0, 0.0, 0.0, 0.0,
+            0.0, cos(rad), -sin(rad), 0.0,
+            0.0, sin(rad), cos(rad), 0.0,
+            0.0, 0.0, 0.0, 1.0);
+    return xRot;
+}
+
+
+glm::mat4 buildRotateY(float rad){
+    glm::mat4 yRot = glm::mat4(
+            cos(rad), 0.0, sin(rad), 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            -sin(rad), 0.0, cos(rad), 0.0,
+            0.0, 0.0, 0.0, 1.0);
+    return yRot;
+}
+
+
+glm::mat4 buildRotateZ(float rad){
+    glm::mat4 zRot = glm::mat4(
+            cos(rad), -sin(rad), 0.0, 0.0,
+            sin(rad), cos(rad), 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0);
+    return zRot;
+}
+
+
+glm::mat4 buildScale(float x, float y, float z){
+    glm::mat4 scale = glm::mat4(
+            x, 0.0, 0.0, 0.0,
+            0.0, y, 0.0, 0.0,
+            0.0, 0.0, z, 0.0,
+            0.0, 0.0, 0.0, 1.0);
+    return scale;
+}

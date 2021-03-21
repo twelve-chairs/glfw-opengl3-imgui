@@ -15,9 +15,12 @@
 #include <spdlog/spdlog.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
-#ifndef UNTITLED_COMMON_H
-#define UNTITLED_COMMON_H
+#ifndef OPENGL_COMMON_H
+#define OPENGL_COMMON_H
+
+#define GLEW_STATIC
 
 static std::string glsl_version;
 
@@ -28,4 +31,10 @@ void printProgramLog(int prog);
 bool checkOpenGLError();
 int randomInteger(int to, int from);
 
-#endif //UNTITLED_COMMON_H
+glm::mat4 buildTranslate(float x, float y, float z);
+glm::mat4 buildRotateX(float rad);
+glm::mat4 buildRotateY(float rad);
+glm::mat4 buildRotateZ(float rad);
+glm::mat4 buildScale(float x, float y, float z);
+
+#endif //OPENGL_COMMON_H
