@@ -2,8 +2,8 @@
 
 
 GLuint createShaderProgram(){
-    std::string vertexShaderSource = readShaderSource("../../src/vertexShader.glsl");
-    std::string fragmentShaderSource = readShaderSource("../../src/fragmentShader.glsl");
+    std::string vertexShaderSource = readSourceFile("vertexShader.glsl");
+    std::string fragmentShaderSource = readSourceFile("fragmentShader.glsl");
     const char* vertexShaderSourceString = vertexShaderSource.c_str();
     const char* fragmentShaderSourceString = fragmentShaderSource.c_str();
 
@@ -32,11 +32,23 @@ void init(GLFWwindow* window) {
 }
 
 void display(GLFWwindow* window, double currentTime){
-//    glClearColor(1.0, 0.0, 0.0, 1.0);
-//    glClear(GL_COLOR_BUFFER_BIT);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     glUseProgram(renderingProgram);
-    glPointSize(60);
-    glDrawArrays(GL_POINTS, 0, 1);
+
+//    glPointSize(60);
+//    glDrawArrays(GL_POINTS, 0, 1);
+
+    x += inc;
+    if (x > 1.0f) inc = -0.01f;
+    if (x < -1.0f) inc = 0.01f;
+    GLuint offsetLocation = glGetUniformLocation(renderingProgram, "offset");
+    glProgramUniform1f(renderingProgram, offsetLocation, x);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 int main(int, char**){

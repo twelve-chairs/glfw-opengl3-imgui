@@ -16,13 +16,12 @@ void selectGLVersion(){
 #endif
 }
 
-std::string readShaderSource(std::string filePath){
+std::string readSourceFile(std::string filePath){
     try {
         spdlog::debug("Path: {} Exists: {}", filePath, std::filesystem::exists(filePath));
 
         if (std::filesystem::exists(filePath)) {
             std::ifstream sourceFile(filePath, std::ios::in);
-            spdlog::debug("Exceptions: {}", sourceFile.exceptions());
 
             std::string sourceCode = glsl_version;
             std::string line;

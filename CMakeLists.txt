@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT_NAME "untitled")
+set(PROJECT_NAME "opengl")
 set(CMAKE_CONFIGURATION_TYPES "MinSizeRel; Debug" CACHE STRING "" FORCE)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -12,9 +12,8 @@ conan_basic_setup()
 
 file(GLOB H_FILES "src/*.h")
 file(GLOB CPP_FILES "src/*.cpp")
-file(GLOB GLSL_FILES "src/*.glsl")
-
-file(COPY ${GLSL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB GLSL_FILES "glsl/*.glsl")
+file(COPY ${GLSL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 add_executable(${PROJECT_NAME} ${H_FILES} ${CPP_FILES})
 

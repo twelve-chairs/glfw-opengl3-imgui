@@ -11,4 +11,7 @@
 GLuint renderingProgram;
 GLuint vertexArrayObjects[numVAOs];
 
+float x = 0.0f;
+float inc = 0.01f;
+
 #endif //UNTITLED_MAIN_H
