@@ -1,15 +1,14 @@
 //
 // Created by VokamisAir on 3/18/21.
 //
+#define GLEW_STATIC
 
-#include <filesystem>
-#include <limits>
 #include <iostream>
 #include <fstream>
 #include <ctime>
 #include <vector>
 #include <map>
-#include <iterator>
+#include <thread>
 #include <string>
 #include <random>
 #include <spdlog/spdlog.h>
@@ -19,8 +18,6 @@
 
 #ifndef OPENGL_COMMON_H
 #define OPENGL_COMMON_H
-
-#define GLEW_STATIC
 
 static std::string glsl_version;
 
