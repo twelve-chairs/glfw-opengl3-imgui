@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(PROJECT_NAME "opengl")
+set(PROJECT_NAME "glfw-vulkan")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -21,8 +21,6 @@ endif()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_cmake_configure(REQUIRES spdlog/1.9.2
         glfw/3.3.4
-        glew/2.2.0
-        glm/0.9.9.8
         imgui/1.84.2
         GENERATORS cmake cmake_paths cmake_find_package)
 conan_cmake_autodetect(settings)
@@ -34,17 +32,15 @@ conan_cmake_install(PATH_OR_REFERENCE .
 
 find_package(spdlog REQUIRED)
 find_package(glfw3 REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
+find_package(Vulkan REQUIRED)
+
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVK_PROTOTYPES")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_PROTOTYPES")
 
 file(GLOB H_FILES "src/*.h")
 file(GLOB CPP_FILES "src/*.cpp")
-file(GLOB GLSL_FILES "glsl/*.glsl")
-file(GLOB INCL_FILES "include/*.*")
 
-file(COPY ${GLSL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
+add_executable(${PROJECT_NAME} ${H_FILES} ${CPP_FILES})
 
-add_executable(${PROJECT_NAME} ${H_FILES} ${CPP_FILES} ${INCL_FILES})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog imgui::imgui glfw::glfw GLEW::GLEW glm::glm)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw::glfw Vulkan::Vulkan imgui::imgui spdlog::spdlog)
