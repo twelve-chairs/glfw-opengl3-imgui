@@ -1,6 +1,6 @@
 #include "common.h"
 
-void selectGLVersion(){
+std::string selectGLVersion(){
 #ifdef __APPLE__
     glsl_version = "#version 410 \n";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -13,6 +13,7 @@ void selectGLVersion(){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 #endif
+    return glsl_version;
 }
 
 

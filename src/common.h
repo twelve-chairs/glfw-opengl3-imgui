@@ -16,13 +16,16 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <imgui.h>
+#include "../include/imgui_impl_glfw.h"
+#include "../include/imgui_impl_opengl3.h"
 
 #ifndef OPENGL_COMMON_H
 #define OPENGL_COMMON_H
 
 static std::string glsl_version;
 
-void selectGLVersion();
+std::string selectGLVersion();
 std::string readSourceFile(const std::string& filePath);
 void printShaderLog(GLuint shader);
 void printProgramLog(int prog);

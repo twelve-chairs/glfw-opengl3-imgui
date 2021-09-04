@@ -56,13 +56,19 @@ int main(int, char**){
         return 1;
     }
 
-    selectGLVersion();
+    glsl_version = selectGLVersion();
 
     GLFWwindow* window = glfwCreateWindow(300, 300, "GLFW+ImGui+OpenGL", nullptr, nullptr);
     if (window == nullptr) {
         spdlog::error("Failed to create GLFW window!\n");
         return 1;
     }
+
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
 
     glfwMakeContextCurrent(window);
 
@@ -76,12 +82,34 @@ int main(int, char**){
     // Enable vsync
     glfwSwapInterval(1);
 
+
+    // Setup Platform/Renderer backends
+    ImGui::StyleColorsClassic();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version.c_str());
     init(window);
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     while (!glfwWindowShouldClose(window)){
         display(window, glfwGetTime());
-        glfwSwapBuffers(window);
+//        glfwSwapBuffers(window);
         glfwPollEvents();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+//        ImGui::ShowDemoWindow();
+        // Rendering
+        ImGui::Render();
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        display(window, glfwGetTime());
+
+        glfwSwapBuffers(window);
     }
 
     glfwDestroyWindow(window);
