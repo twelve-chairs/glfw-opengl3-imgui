@@ -34,7 +34,7 @@ conan_cmake_install(PATH_OR_REFERENCE .
 
 find_package(spdlog REQUIRED)
 find_package(glfw3 REQUIRED)
-find_package(glew REQUIRED)
+find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 
