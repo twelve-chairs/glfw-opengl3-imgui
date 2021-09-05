@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(PROJECT_NAME "glfw-vulkan")
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(${PROJECT_NAME} LANGUAGES C CXX)
@@ -22,6 +22,7 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_cmake_configure(REQUIRES spdlog/1.9.2
         glfw/3.3.4
         imgui/1.84.2
+        glm/0.9.9.8
         GENERATORS cmake cmake_paths cmake_find_package)
 conan_cmake_autodetect(settings)
 conan_cmake_install(PATH_OR_REFERENCE .
@@ -33,7 +34,8 @@ conan_cmake_install(PATH_OR_REFERENCE .
 find_package(spdlog REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(imgui REQUIRED)
-find_package(Vulkan REQUIRED)
+find_package(glm REQUIRED)
+find_package(Vulkan REQUIRED) # https://vulkan.lunarg.com/sdk/home
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVK_PROTOTYPES")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_PROTOTYPES")
@@ -43,4 +45,4 @@ file(GLOB CPP_FILES "src/*.cpp")
 
 add_executable(${PROJECT_NAME} ${H_FILES} ${CPP_FILES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw::glfw Vulkan::Vulkan imgui::imgui spdlog::spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw::glfw Vulkan::Vulkan imgui::imgui glm::glm spdlog::spdlog)
