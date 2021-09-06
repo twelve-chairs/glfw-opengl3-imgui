@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(PROJECT_NAME "sdl-vulkan-imgui")
+set(PROJECT_NAME "glfw-opengl3-imgui")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -20,7 +20,8 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_cmake_configure(REQUIRES spdlog/1.9.2
-        sdl/2.0.16
+        glfw/3.3.4
+        opengl/system
         imgui/1.84.2
         glm/0.9.9.8
         GENERATORS cmake cmake_paths cmake_find_package)
@@ -32,17 +33,15 @@ conan_cmake_install(PATH_OR_REFERENCE .
 ########################################################################################################################
 
 find_package(spdlog REQUIRED)
-find_package(SDL2 REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(OpenGL REQUIRED)
 find_package(imgui REQUIRED)
 find_package(glm REQUIRED)
-find_package(Vulkan REQUIRED) # https://vulkan.lunarg.com/sdk/home
-
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DVK_PROTOTYPES")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVK_PROTOTYPES")
 
 file(GLOB H_FILES "src/*.h")
 file(GLOB CPP_FILES "src/*.cpp")
+file(GLOB INCLUDE "src/include/*.*")
 
-add_executable(${PROJECT_NAME} ${H_FILES} ${CPP_FILES})
+add_executable(${PROJECT_NAME} ${H_FILES} ${CPP_FILES} ${INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 Vulkan::Vulkan imgui::imgui glm::glm spdlog::spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw::glfw opengl::opengl imgui::imgui glm::glm spdlog::spdlog)
