@@ -24,7 +24,7 @@ jobs:
         sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
 
         sudo apt-get update
-        sudo apt-get install -y build-essential git pip cmake curl vulkan-sdk libgl-dev libglu1-mesa-dev libegl-dev
+        sudo apt-get install -y build-essential git pip cmake curl libgl-dev libglu1-mesa-dev libegl-dev
         pip install conan
 
     - name: Sonar Build Wrapper
@@ -33,7 +33,7 @@ jobs:
         curl -L -O https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
         unzip -q build-wrapper-linux-x86.zip
         cmake -DCMAKE_BUILD_TYPE=MinSizeRel -G "CodeBlocks - Unix Makefiles" .
-        build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-outputs cmake --build . --target sdl-vulkan-imgui -- -j 2
+        build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-outputs cmake --build . --target glfw-opengl3-imgui -- -j 2
 
     - name: Sonar Scanner
       shell: bash
