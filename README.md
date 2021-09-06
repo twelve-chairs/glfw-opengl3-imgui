@@ -1,4 +1,4 @@
-# sdl-vulkan-imgui
+# glfw-opengl3-imgui
 
 [![Build](https://github.com/twelvechairssoftware/GLFW-ImGui-OpenGL/actions/workflows/build.yml/badge.svg)](https://github.com/twelvechairssoftware/GLFW-ImGui-OpenGL/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=twelvechairssoftware_GLFW-ImGui-OpenGL&metric=alert_status)](https://sonarcloud.io/dashboard?id=twelvechairssoftware_GLFW-ImGui-OpenGL)
