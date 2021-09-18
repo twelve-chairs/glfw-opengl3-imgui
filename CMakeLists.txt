@@ -19,11 +19,11 @@ if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
 endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
-conan_cmake_configure(REQUIRES spdlog/1.9.2
-        glfw/3.3.4
-        opengl/system
+conan_cmake_configure(REQUIRES glfw/3.3.4
+        glew/2.2.0
         imgui/1.84.2
         glm/0.9.9.8
+        spdlog/1.9.2
         GENERATORS cmake cmake_paths cmake_find_package)
 conan_cmake_autodetect(settings)
 conan_cmake_install(PATH_OR_REFERENCE .
@@ -32,11 +32,11 @@ conan_cmake_install(PATH_OR_REFERENCE .
         SETTINGS ${settings})
 ########################################################################################################################
 
-find_package(spdlog REQUIRED)
 find_package(glfw3 REQUIRED)
-find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
 find_package(imgui REQUIRED)
 find_package(glm REQUIRED)
+find_package(spdlog REQUIRED)
 
 file(GLOB H_FILES "src/*.h")
 file(GLOB CPP_FILES "src/*.cpp")
@@ -44,4 +44,4 @@ file(GLOB INCLUDE "src/include/*.*")
 
 add_executable(${PROJECT_NAME} ${H_FILES} ${CPP_FILES} ${INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw::glfw opengl::opengl imgui::imgui glm::glm spdlog::spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW glfw::glfw imgui::imgui glm::glm spdlog::spdlog)

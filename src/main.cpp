@@ -3,15 +3,7 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
-#include "imgui.h"
-#include "include/imgui_impl_glfw.h"
-#include "include/imgui_impl_opengl3.h"
-#include "include/imgui_impl_opengl3_loader.h"
-#include <cstdio>
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <GLES2/gl2.h>
-#endif
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#include "main.h"
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -20,62 +12,181 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#define numVAOs 1
+
+GLuint vertexArrayObjects[numVAOs];
+GLuint renderingProgram = 0;
+GLuint renderedTexture = 0;
+float x = 0.0f;
+float inc = 0.01f;
+
 static void glfw_error_callback(int error, const char* description)
 {
-    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+    spdlog::error("Glfw Error {}: {}\n", error, description);
 }
+
+GLuint createShaderProgram(){
+    std::string vertexShaderString = readShaderSource("../src/include/vertexShader.glsl");
+    std::string fragmentShaderString = readShaderSource("../src/include/fragmentShader.glsl");
+    const char* vertexShaderSource = vertexShaderString.c_str();
+    const char* fragmentShaderSource = fragmentShaderString.c_str();
+
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+
+    GLint vertexCompiled;
+    GLint fragmentCompiled;
+    GLint linked;
+
+    glCompileShader(vertexShader);
+    checkOpenGLError();
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexCompiled);
+    if (vertexCompiled != 1){
+        spdlog::error("vertexCompiled: Error");
+        printShaderLog(vertexShader);
+    }
+
+    glCompileShader(fragmentShader);
+    checkOpenGLError();
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragmentCompiled);
+    if (fragmentCompiled != 1){
+        spdlog::error("fragmentCompiled: Error");
+        printShaderLog(fragmentShader);
+    }
+
+    GLuint vfProgram = glCreateProgram();
+
+    glAttachShader(vfProgram, vertexShader);
+    glAttachShader(vfProgram, fragmentShader);
+
+    glLinkProgram(vfProgram);
+    checkOpenGLError();
+    glGetProgramiv(vfProgram, GL_LINK_STATUS, &linked);
+    if (linked != 1){
+        spdlog::error("linked: error");
+        printProgramLog(vfProgram);
+    }
+
+    if (checkOpenGLError()){
+        printShaderLog(vertexShader);
+        printProgramLog(vfProgram);
+    }
+
+    return vfProgram;
+}
+
+void init(GLFWwindow* window){
+    renderingProgram = createShaderProgram();
+    glGenVertexArrays(numVAOs, vertexArrayObjects);
+    glBindVertexArray(vertexArrayObjects[0]);
+}
+
+void display(GLFWwindow* window, double currentTime){
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glUseProgram(renderingProgram);
+
+    x += inc;
+    if (x > 1.0f){inc = -0.01f;}
+    if (x < -1.0f){inc = 0.01f;}
+    GLuint offsetLocation = glGetUniformLocation(renderingProgram, "offset");
+    glProgramUniform1f(renderingProgram, offsetLocation, x);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+//void init()
+//{
+//    glClearColor (1.0, 1.0, 1.0, 1.0);
+//    glClear(GL_COLOR_BUFFER_BIT);
+//    glShadeModel(GL_FLAT);
+//    glEnable(GL_DEPTH_TEST);
+//
+//    makeCheckImage();
+//    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//
+//    glGenTextures(1, &texName);
+//    glBindTexture(GL_TEXTURE_2D, texName);
+//
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+//                    GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+//                    GL_NEAREST);
+//    display(800, 600);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 800,
+//                 600, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+//                 checkImage);
+//}
 
 int main(int, char**)
 {
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
-    if (!glfwInit())
+    if (!glfwInit()){
+        spdlog::error("glfwInit");
         return 1;
+    }
 
-    // Decide GL+GLSL versions
+    {
+        // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
-    // GL ES 2.0 + GLSL 100
-    const char* glsl_version = "#version 100";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+        // GL ES 2.0 + GLSL 100
+        const char* glsl_version = "#version 100";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(__APPLE__)
-    // GL 3.2 + GLSL 150
-    const char* glsl_version = "#version 150";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+        // GL 3.2 + GLSL 150
+        const char *glsl_version = "#version 150";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
-    // GL 3.0 + GLSL 130
-    const char* glsl_version = "#version 130";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+        // GL 3.0 + GLSL 130
+        const char* glsl_version = "#version 130";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+        //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
+    }
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
-    if (window == NULL)
+    GLFWwindow* window = glfwCreateWindow(300, 300, "glfw-opengl3-imgui", NULL, NULL);
+    if (window == NULL) {
+        spdlog::error("glfwCreateWindow");
         return 1;
+    }
     glfwMakeContextCurrent(window);
+
+    if (glewInit() != GLEW_OK){
+        spdlog::error("glewInit");
+        return 1;
+    }
+
     glfwSwapInterval(1); // Enable vsync
 
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
+//    // Setup Dear ImGui context
+//    IMGUI_CHECKVERSION();
+//    ImGui::CreateContext();
+//    ImGuiIO& io = ImGui::GetIO(); (void)io;
+//    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+//    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+//
+//    // Setup Dear ImGui style
+//    ImGui::StyleColorsLight();
+//
+//    // Setup Platform/Renderer backends
+//    ImGui_ImplGlfw_InitForOpenGL(window, true);
+//    ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -93,13 +204,14 @@ int main(int, char**)
     //IM_ASSERT(font != NULL);
 
     // Our state
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    init(window);
+
     // Main loop
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)){
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -107,64 +219,76 @@ int main(int, char**)
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        display(window, glfwGetTime());
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
-
-        // Rendering
-        ImGui::Render();
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//        // Start the Dear ImGui frame
+//        ImGui_ImplOpenGL3_NewFrame();
+//        ImGui_ImplGlfw_NewFrame();
+//        ImGui::NewFrame();
+//
+//        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+//        if (show_demo_window)
+//            ImGui::ShowDemoWindow(&show_demo_window);
+//
+//        {
+//            ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
+//            ImGui::SetNextWindowSize(ImVec2(220, 50), ImGuiCond_Always);
+//            ImGui::Begin("Stats");
+//            ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+//            ImGui::End();
+//        }
+//
+//        {
+//            ImGui::SetNextWindowPos( ImVec2(230,0), ImGuiCond_Once);
+//            ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Once);
+//            ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+//            {
+//        // Using a Child allow to fill all the space of the window.
+//        // It also allows customization
+//                ImGui::BeginChild("Render");
+//        // Get the size of the child (i.e. the whole draw size of the windows).
+//                ImVec2 wsize = ImGui::GetWindowSize();
+//
+//                try {
+//                    display(window, glfwGetTime());
+//                }
+//                catch (std::exception &e){
+//                    spdlog::error("createTexture: {}", e.what());
+//                }
+//
+//                try {
+//                    ImGui::Image(reinterpret_cast<ImTextureID>(2), wsize);
+//        // Because I use the texture from OpenGL, I need to invert the V from the UV.
+//        // ImGui::Image(reinterpret_cast<ImTextureID>(0), wsize, ImVec2(0, 1), ImVec2(1, 0));
+//                }
+//                catch (std::exception &e){
+//                    spdlog::error("ImGui::Image: {}", e.what());
+//                }
+//
+//                ImGui::EndChild();
+//            }
+//            ImGui::End();
+//        }
+//
+//        // Rendering
+//        ImGui::Render();
+//        int display_w, display_h;
+//        glfwGetFramebufferSize(window, &display_w, &display_h);
+//        glViewport(0, 0, display_w, display_h);
+//        glClearColor(clear_color.x * clear_color.w,
+//                     clear_color.y * clear_color.w,
+//                     clear_color.z * clear_color.w,
+//                     clear_color.w);
+//        glClear(GL_COLOR_BUFFER_BIT);
+//        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
     }
 
-    // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+//    // Cleanup
+//    ImGui_ImplOpenGL3_Shutdown();
+//    ImGui_ImplGlfw_Shutdown();
+//    ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
