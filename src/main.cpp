@@ -24,15 +24,17 @@ GLuint renderedTexture = 0;
 float cameraX, cameraY, cameraZ;
 float cubeLocationX, cubeLocationY, cubeLocationZ;
 
-GLuint modelViewMatrixLocation, projectionLocation;
+GLuint viewLocation, modelViewMatrixLocation, projectionLocation, timeFrameLocation;
 int width, height;
 float aspect;
 glm::mat4 perspectiveMatrix, translationMatrix, rotationMatrix, viewMatrix, modelMatrix, modelViewMatrix;
+
 
 static void glfw_error_callback(int error, const char* description)
 {
     spdlog::error("Glfw Error {}: {}\n", error, description);
 }
+
 
 void setupVertices(void){
     float vertexPositions[108] = {
@@ -57,6 +59,7 @@ void setupVertices(void){
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
     spdlog::info("setupVertices");
 }
+
 
 GLuint createShaderProgram(){
     std::string vertexShaderString = readShaderSource("../src/include/vertexShader.glsl");
@@ -111,11 +114,12 @@ GLuint createShaderProgram(){
     return vfProgram;
 }
 
+
 void init(GLFWwindow* window){
     renderingProgram = createShaderProgram();
     cameraX = 0.0f;
     cameraY = 0.0f;
-    cameraZ = 8.0f;
+    cameraZ = 420.0f;
     cubeLocationX = 0.0f;
     cubeLocationY = -2.0f;
     cubeLocationZ = 0.0f;
@@ -124,61 +128,38 @@ void init(GLFWwindow* window){
     spdlog::info("init");
 }
 
+
 void display(GLFWwindow* window, double currentTime){
     glClear(GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(renderingProgram);
 
+    viewLocation = glGetUniformLocation(renderingProgram, "v_matrix");
     modelViewMatrixLocation = glGetUniformLocation(renderingProgram, "mv_matrix");
     projectionLocation = glGetUniformLocation(renderingProgram, "proj_matrix");
+    timeFrameLocation = glGetUniformLocation(renderingProgram, "tf");
 
     glfwGetFramebufferSize(window, &width, &height);
     aspect = (float)width / (float)height;
     perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
-    for (int i=0; i< 24; i++) {
-        float tf = currentTime + i;
-        translationMatrix = glm::translate(glm::mat4(1.0f),
-                                           glm::vec3(
-                                                   sin(0.35f * tf) * 8.0f,
-                                                   cos(0.52f * tf) * 8.0f,
-                                                   sin(0.7f * tf) * 8.0f)
-        );
+    viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
+    modelMatrix = translationMatrix * rotationMatrix;
+    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
 
-        // the 1.75 adjusts the rotation speed
-        rotationMatrix = glm::rotate(
-                glm::mat4(1.0f),
-                1.75f * (float) currentTime,
-                glm::vec3(0.0f, 1.0f, 0.0f)
-        );
-        rotationMatrix = glm::rotate(
-                rotationMatrix,
-                1.75f * (float) currentTime,
-                glm::vec3(1.0f, 0.0f, 0.0f)
-        );
-        rotationMatrix = glm::rotate(
-                rotationMatrix,
-                1.75f * (float) currentTime,
-                glm::vec3(0.0f, 0.0f, 1.0f)
-        );
+    glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    auto timeFactor = ((float)currentTime);
+    glUniform1f(timeFrameLocation, (float)timeFactor);
 
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
 
-        viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-        modelMatrix = translationMatrix * rotationMatrix;
-        modelViewMatrix = viewMatrix * modelMatrix;
-
-        glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
-        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
-
-        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(0);
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
 }
+
 
 int main(int, char**){
     // Setup window
