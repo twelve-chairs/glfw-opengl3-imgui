@@ -13,16 +13,49 @@
 #endif
 
 #define numVAOs 1
+#define numVBOs 1
 
 GLuint vertexArrayObjects[numVAOs];
+GLuint vertexBuffersObject[numVBOs];
+
 GLuint renderingProgram = 0;
 GLuint renderedTexture = 0;
-float x = 0.0f;
-float inc = 0.01f;
+
+float cameraX, cameraY, cameraZ;
+float cubeLocationX, cubeLocationY, cubeLocationZ;
+
+GLuint modelViewMatrixLocation, projectionLocation;
+int width, height;
+float aspect;
+glm::mat4 perspectiveMatrix, translationMatrix, rotationMatrix, viewMatrix, modelMatrix, modelViewMatrix;
 
 static void glfw_error_callback(int error, const char* description)
 {
     spdlog::error("Glfw Error {}: {}\n", error, description);
+}
+
+void setupVertices(void){
+    float vertexPositions[108] = {
+            -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f
+    };
+    glGenVertexArrays(1, vertexArrayObjects);
+    glBindVertexArray(vertexArrayObjects[0]);
+    glGenBuffers(numVBOs, vertexBuffersObject);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+    spdlog::info("setupVertices");
 }
 
 GLuint createShaderProgram(){
@@ -80,53 +113,74 @@ GLuint createShaderProgram(){
 
 void init(GLFWwindow* window){
     renderingProgram = createShaderProgram();
-    glGenVertexArrays(numVAOs, vertexArrayObjects);
-    glBindVertexArray(vertexArrayObjects[0]);
+    cameraX = 0.0f;
+    cameraY = 0.0f;
+    cameraZ = 8.0f;
+    cubeLocationX = 0.0f;
+    cubeLocationY = -2.0f;
+    cubeLocationZ = 0.0f;
+
+    setupVertices();
+    spdlog::info("init");
 }
 
 void display(GLFWwindow* window, double currentTime){
     glClear(GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-
     glUseProgram(renderingProgram);
 
-    x += inc;
-    if (x > 1.0f){inc = -0.01f;}
-    if (x < -1.0f){inc = 0.01f;}
-    GLuint offsetLocation = glGetUniformLocation(renderingProgram, "offset");
-    glProgramUniform1f(renderingProgram, offsetLocation, x);
+    modelViewMatrixLocation = glGetUniformLocation(renderingProgram, "mv_matrix");
+    projectionLocation = glGetUniformLocation(renderingProgram, "proj_matrix");
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glfwGetFramebufferSize(window, &width, &height);
+    aspect = (float)width / (float)height;
+    perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
+
+    for (int i=0; i< 24; i++) {
+        float tf = currentTime + i;
+        translationMatrix = glm::translate(glm::mat4(1.0f),
+                                           glm::vec3(
+                                                   sin(0.35f * tf) * 8.0f,
+                                                   cos(0.52f * tf) * 8.0f,
+                                                   sin(0.7f * tf) * 8.0f)
+        );
+
+        // the 1.75 adjusts the rotation speed
+        rotationMatrix = glm::rotate(
+                glm::mat4(1.0f),
+                1.75f * (float) currentTime,
+                glm::vec3(0.0f, 1.0f, 0.0f)
+        );
+        rotationMatrix = glm::rotate(
+                rotationMatrix,
+                1.75f * (float) currentTime,
+                glm::vec3(1.0f, 0.0f, 0.0f)
+        );
+        rotationMatrix = glm::rotate(
+                rotationMatrix,
+                1.75f * (float) currentTime,
+                glm::vec3(0.0f, 0.0f, 1.0f)
+        );
+
+
+        viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
+        modelMatrix = translationMatrix * rotationMatrix;
+        modelViewMatrix = viewMatrix * modelMatrix;
+
+        glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
+        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(0);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 }
 
-//void init()
-//{
-//    glClearColor (1.0, 1.0, 1.0, 1.0);
-//    glClear(GL_COLOR_BUFFER_BIT);
-//    glShadeModel(GL_FLAT);
-//    glEnable(GL_DEPTH_TEST);
-//
-//    makeCheckImage();
-//    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//
-//    glGenTextures(1, &texName);
-//    glBindTexture(GL_TEXTURE_2D, texName);
-//
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-//                    GL_NEAREST);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-//                    GL_NEAREST);
-//    display(800, 600);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 800,
-//                 600, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-//                 checkImage);
-//}
-
-int main(int, char**)
-{
+int main(int, char**){
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit()){

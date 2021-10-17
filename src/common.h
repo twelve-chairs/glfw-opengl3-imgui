@@ -6,14 +6,15 @@
 #define ZXPAINT_COMMON_H
 
 
-//#include <ctime>
-//#include <vector>
-//#include <map>
 #include <string>
 #include <random>
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include <cstdio>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <GL/glew.h>
 
@@ -31,4 +32,4 @@ void printProgramLog(int program);
 bool checkOpenGLError();
 std::string readShaderSource(const char* filePath);
 
-#endif //ZXPAINT_COMMON_H
+#endif //COMMON_H

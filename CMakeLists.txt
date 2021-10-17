@@ -1,3 +1,9 @@
+###################
+# Pre-requisites: #
+#     Conan       #
+#     Cmake       #
+###################
+
 cmake_minimum_required(VERSION 3.20)
 
 set(PROJECT_NAME "glfw-opengl3-imgui")
@@ -19,7 +25,8 @@ if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
 endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
-conan_cmake_configure(REQUIRES glfw/3.3.4
+conan_cmake_configure(REQUIRES cmake/3.21.3
+        glfw/3.3.4
         glew/2.2.0
         imgui/1.84.2
         glm/0.9.9.8
