@@ -51,11 +51,6 @@ jobs:
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
-    # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
-    # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
-
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
 
@@ -66,6 +61,30 @@ jobs:
     #- run: |
     #   make bootstrap
     #   make release
+    - name: Packages
+      shell: bash
+      run: |
+        wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+        sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
+
+        sudo apt-get update
+        sudo apt-get install -y build-essential git pip cmake curl libgl-dev libglu1-mesa-dev libegl-dev
+        pip install conan
+
+    - name: Sonar Build Wrapper
+      shell: bash
+      run: |
+        curl -L -O https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+        unzip -q build-wrapper-linux-x86.zip
+        cmake -DCMAKE_BUILD_TYPE=MinSizeRel -G "CodeBlocks - Unix Makefiles" .
+        build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-outputs cmake --build . --target glfw-opengl3-imgui -- -j 2
+
+    - name: Sonar Scanner
+      shell: bash
+      run: |
+        curl -L -O https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.4.0.2170-linux.zip
+        unzip sonar-scanner-cli-4.4.0.2170-linux.zip
+        sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
