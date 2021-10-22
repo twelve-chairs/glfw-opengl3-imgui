@@ -20,6 +20,12 @@ on:
   schedule:
     - cron: '33 3 * * 3'
 
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  
 jobs:
   analyze:
     name: Analyze
