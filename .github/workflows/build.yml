@@ -1,6 +1,10 @@
 name: Build
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '33 3 * * 3'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -11,11 +15,25 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp' ]
 
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+        
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
         
     - name: Packages
       shell: bash
@@ -41,3 +59,6 @@ jobs:
         curl -L -O https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.4.0.2170-linux.zip
         unzip sonar-scanner-cli-4.4.0.2170-linux.zip
         sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner
+        
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
