@@ -24,6 +24,7 @@ GLuint renderedTexture = 0;
 float cameraX, cameraY, cameraZ;
 float cubeLocationX, cubeLocationY, cubeLocationZ;
 
+unsigned int fbo, rbo;
 GLuint viewLocation, modelViewMatrixLocation, projectionLocation, timeFrameLocation;
 int width, height;
 float aspect;
@@ -115,6 +116,33 @@ GLuint createShaderProgram(){
 }
 
 
+void frameBuffer(){
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    // generate texture
+    unsigned int textureColorbuffer;
+    glGenTextures(1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // attach it to currently bound framebuffer object
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
 void init(GLFWwindow* window){
     renderingProgram = createShaderProgram();
     cameraX = 0.0f;
@@ -123,13 +151,14 @@ void init(GLFWwindow* window){
     cubeLocationX = 0.0f;
     cubeLocationY = -2.0f;
     cubeLocationZ = 0.0f;
-
+    frameBuffer();
     setupVertices();
     spdlog::info("init");
 }
 
-
 void display(GLFWwindow* window, double currentTime){
+    glBindFramebuffer(GL_FRAMEBUFFER,fbo);
+
     glClear(GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(renderingProgram);
@@ -154,13 +183,15 @@ void display(GLFWwindow* window, double currentTime){
     auto timeFactor = ((float)currentTime);
     glUniform1f(timeFrameLocation, (float)timeFactor);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
+//    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
+
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
 
@@ -182,7 +213,7 @@ int main(int, char**){
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(__APPLE__)
         // GL 3.2 + GLSL 150
-        const char *glsl_version = "#version 150";
+        glsl_version = "#version 150";
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
@@ -216,15 +247,15 @@ int main(int, char**){
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-//    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 //    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 //
 //    // Setup Dear ImGui style
-    ImGui::StyleColorsLight();
+    ImGui::StyleColorsDark();
 //
 //    // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(NULL);
+    ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -288,16 +319,16 @@ int main(int, char**){
                 ImVec2 wsize = ImGui::GetWindowSize();
 
                 try {
-                    display(window, glfwGetTime());
+
                 }
                 catch (std::exception &e){
                     spdlog::error("createTexture: {}", e.what());
                 }
 
                 try {
-                    ImGui::Image(reinterpret_cast<ImTextureID>(2), wsize);
-                    // Because I use the texture from OpenGL, I need to invert the V from the UV.
-                    // ImGui::Image(reinterpret_cast<ImTextureID>(0), wsize, ImVec2(0, 1), ImVec2(1, 0));
+
+                     ImGui::Image(reinterpret_cast<ImTextureID>(fbo), wsize, ImVec2(0, 1), ImVec2(1, 0));
+//                     ImGui::Image(reinterpret_cast<ImTextureID>(0), wsize, ImVec2(0, 1), ImVec2(1, 0));
                 }
                 catch (std::exception &e){
                     spdlog::error("ImGui::Image: {}", e.what());
@@ -310,6 +341,8 @@ int main(int, char**){
 
 //        // Rendering
         ImGui::Render();
+        display(window, glfwGetTime());
+
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
@@ -319,12 +352,13 @@ int main(int, char**){
                      clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-//        display(window, glfwGetTime());
+
 
         glfwSwapBuffers(window);
     }
 
-//    // Cleanup
+
+    // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
