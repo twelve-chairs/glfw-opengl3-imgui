@@ -116,14 +116,14 @@ GLuint createShaderProgram(){
 }
 
 
-void initFrameBuffer(){
+void initFrameBuffer(ImVec2 wsize){
     glGenFramebuffers(1, &frameBufferObject);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
     // generate texture
     unsigned int textureColorbuffer;
     glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, wsize.x, wsize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -133,7 +133,7 @@ void initFrameBuffer(){
 
     glGenRenderbuffers(1, &renderBufferObject);
     glBindRenderbuffer(GL_RENDERBUFFER, renderBufferObject);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, wsize.x, wsize.y);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferObject);
 
@@ -141,7 +141,6 @@ void initFrameBuffer(){
         spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
 
 void init(GLFWwindow* window){
     renderingProgram = createShaderProgram();
@@ -151,12 +150,14 @@ void init(GLFWwindow* window){
     cubeLocationX = 0.0f;
     cubeLocationY = -2.0f;
     cubeLocationZ = 0.0f;
-    initFrameBuffer();
     setupVertices();
     spdlog::info("init");
 }
 
-void display(GLFWwindow* window, double currentTime){
+void display(GLFWwindow* window, double currentTime, ImVec2 wsize){
+    initFrameBuffer(wsize);
+    glClearColor( 0.0f , 0.0f , 0.0f , 1.0f );
+    glClear(GL_FRAMEBUFFER);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
 
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -172,9 +173,10 @@ void display(GLFWwindow* window, double currentTime){
     aspect = (float)width / (float)height;
     perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
-    cameraX = (cameraX < 1) ? cameraX + 0.3f : cameraX - 0.3f;
-    cameraY = (cameraY < 1) ? cameraY + 0.3f : cameraY - 0.3f;
-    cameraZ = (cameraZ < 1) ? cameraZ + 0.3f : cameraZ - 0.3f;
+    cameraX += 0.1f;
+    cameraY += 0.1f;
+    cameraZ += 0.4f;
+
     viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
     modelMatrix = translationMatrix * rotationMatrix;
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
@@ -191,7 +193,7 @@ void display(GLFWwindow* window, double currentTime){
     glDepthFunc(GL_LEQUAL);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
 
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 
@@ -229,7 +231,7 @@ int main(int, char**){
     }
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(800, 600, "glfw-opengl3-imgui", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1000, 800, "glfw-opengl3-imgui", NULL, NULL);
     if (window == NULL) {
         spdlog::error("glfwCreateWindow");
         return 1;
@@ -250,14 +252,14 @@ int main(int, char**){
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 //    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 //
-//    // Setup Dear ImGui style
+    // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-//
-//    // Setup Platform/Renderer backends
+
+    // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // Load Fonts
+    // // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
     // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
@@ -316,9 +318,10 @@ int main(int, char**){
                 ImGui::BeginChild("Render");
                 // Get the size of the child (i.e. the whole draw size of the windows).
                 ImVec2 wsize = ImGui::GetWindowSize();
+                spdlog::info("X/Y: {}x{}", wsize.x, wsize.y);
 
                 try {
-                    display(window, glfwGetTime());
+                    display(window, glfwGetTime(), wsize);
                     ImGui::Image(reinterpret_cast<ImTextureID>(frameBufferObject), wsize, ImVec2(0, 1), ImVec2(1, 0));
                 }
                 catch (std::exception &e){
