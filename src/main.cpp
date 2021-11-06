@@ -175,7 +175,7 @@ void display(GLFWwindow* window, double currentTime, ImVec2 wsize){
 
     (cameraX < 1000) ? cameraX += 0.1f : cameraX = 0;
     (cameraY < 1000) ? cameraY += 0.2f : cameraY = 0;
-    (cameraZ < 1400) ? cameraZ += 0.3f : cameraZ = 0;
+    (cameraZ < 1300) ? cameraZ += 0.3f : cameraZ = 0;
 
     viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
     modelMatrix = translationMatrix * rotationMatrix;
@@ -312,9 +312,9 @@ int main(int, char**){
             ImGui::SetNextWindowPos( ImVec2(0,50), ImGuiCond_Once);
             ImGui::SetNextWindowSize(ImVec2(220, 100), ImGuiCond_Always);
             ImGui::Begin("Camera");
-            ImGui::SliderFloat("X", &cameraX, 0, 1400);
-            ImGui::SliderFloat("Y", &cameraY, 0, 1400);
-            ImGui::SliderFloat("Z", &cameraZ, 0, 1400);
+            ImGui::SliderFloat("X", &cameraX, 0, 1000);
+            ImGui::SliderFloat("Y", &cameraY, 0, 1000);
+            ImGui::SliderFloat("Z", &cameraZ, 0, 1300);
             ImGui::End();
         }
 
