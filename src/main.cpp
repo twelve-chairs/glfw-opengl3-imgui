@@ -18,13 +18,13 @@
 GLuint vertexArrayObjects[numVAOs];
 GLuint vertexBuffersObject[numVBOs];
 
+GLuint frameBufferObject, renderBufferObject;
 GLuint renderingProgram = 0;
 GLuint renderedTexture = 0;
 
 float cameraX, cameraY, cameraZ;
 float cubeLocationX, cubeLocationY, cubeLocationZ;
 
-unsigned int fbo, rbo;
 GLuint viewLocation, modelViewMatrixLocation, projectionLocation, timeFrameLocation;
 int width, height;
 float aspect;
@@ -116,9 +116,9 @@ GLuint createShaderProgram(){
 }
 
 
-void frameBuffer(){
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+void initFrameBuffer(){
+    glGenFramebuffers(1, &frameBufferObject);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
     // generate texture
     unsigned int textureColorbuffer;
     glGenTextures(1, &textureColorbuffer);
@@ -131,11 +131,11 @@ void frameBuffer(){
     // attach it to currently bound framebuffer object
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
 
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glGenRenderbuffers(1, &renderBufferObject);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderBufferObject);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferObject);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
@@ -151,13 +151,13 @@ void init(GLFWwindow* window){
     cubeLocationX = 0.0f;
     cubeLocationY = -2.0f;
     cubeLocationZ = 0.0f;
-    frameBuffer();
+    initFrameBuffer();
     setupVertices();
     spdlog::info("init");
 }
 
 void display(GLFWwindow* window, double currentTime){
-    glBindFramebuffer(GL_FRAMEBUFFER,fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
 
     glClear(GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -289,13 +289,12 @@ int main(int, char**){
         glfwPollEvents();
 
 
-//        // Start the Dear ImGui frame
+        // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        //
-//        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
@@ -319,16 +318,8 @@ int main(int, char**){
                 ImVec2 wsize = ImGui::GetWindowSize();
 
                 try {
-
-                }
-                catch (std::exception &e){
-                    spdlog::error("createTexture: {}", e.what());
-                }
-
-                try {
-
-                     ImGui::Image(reinterpret_cast<ImTextureID>(fbo), wsize, ImVec2(0, 1), ImVec2(1, 0));
-//                     ImGui::Image(reinterpret_cast<ImTextureID>(0), wsize, ImVec2(0, 1), ImVec2(1, 0));
+                    display(window, glfwGetTime());
+                    ImGui::Image(reinterpret_cast<ImTextureID>(frameBufferObject), wsize, ImVec2(0, 1), ImVec2(1, 0));
                 }
                 catch (std::exception &e){
                     spdlog::error("ImGui::Image: {}", e.what());
@@ -339,9 +330,8 @@ int main(int, char**){
             ImGui::End();
         }
 
-//        // Rendering
+        // Rendering
         ImGui::Render();
-        display(window, glfwGetTime());
 
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -352,7 +342,6 @@ int main(int, char**){
                      clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 
         glfwSwapBuffers(window);
     }
