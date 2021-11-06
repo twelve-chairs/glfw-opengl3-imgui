@@ -11,6 +11,13 @@ int randomInteger(int to, int from){
     return randomRange(randomEngine);
 }
 
+float randomFloat(float to, float from){
+    std::random_device randomizerSeed;
+    std::default_random_engine randomEngine(randomizerSeed());
+    std::uniform_int_distribution<float> randomRange(from, to);
+    return randomRange(randomEngine);
+}
+
 void printShaderLog(GLuint shader){
     int len = 0;
     int charsWritten = 0;

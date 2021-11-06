@@ -27,6 +27,8 @@
 #include <spdlog/spdlog.h>
 
 int randomInteger(int to, int from = 0);
+float randomFloat(float to, float from = 0);
+
 void printShaderLog(GLuint shader);
 void printProgramLog(int program);
 bool checkOpenGLError();

@@ -143,6 +143,10 @@ void display(GLFWwindow* window, double currentTime){
     aspect = (float)width / (float)height;
     perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
+    if ()
+    cameraX = (cameraX < 1) ? cameraX + 0.3f : cameraX - 0.3f;
+    cameraY = (cameraY < 1) ? cameraY + 0.3f : cameraY - 0.3f;
+    cameraZ = (cameraZ < 1) ? cameraZ + 0.3f : cameraZ - 0.3f;
     viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
     modelMatrix = translationMatrix * rotationMatrix;
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
@@ -195,7 +199,7 @@ int main(int, char**){
     }
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(300, 300, "glfw-opengl3-imgui", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "glfw-opengl3-imgui", NULL, NULL);
     if (window == NULL) {
         spdlog::error("glfwCreateWindow");
         return 1;
