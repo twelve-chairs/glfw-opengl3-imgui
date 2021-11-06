@@ -22,12 +22,12 @@ GLuint frameBufferObject, renderBufferObject;
 GLuint renderingProgram = 0;
 GLuint renderedTexture = 0;
 
-float cameraX, cameraY, cameraZ;
-float cubeLocationX, cubeLocationY, cubeLocationZ;
+static float cameraX, cameraY, cameraZ;
+static float cubeLocationX, cubeLocationY, cubeLocationZ;
 
 GLuint viewLocation, modelViewMatrixLocation, projectionLocation, timeFrameLocation;
 int width, height;
-float aspect;
+static float aspect;
 glm::mat4 perspectiveMatrix, translationMatrix, rotationMatrix, viewMatrix, modelMatrix, modelViewMatrix;
 
 
@@ -173,9 +173,9 @@ void display(GLFWwindow* window, double currentTime, ImVec2 wsize){
     aspect = (float)width / (float)height;
     perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
-    cameraX += 0.1f;
-    cameraY += 0.1f;
-    cameraZ += 0.4f;
+    (cameraX < 1000) ? cameraX += 0.1f : cameraX = 0;
+    (cameraY < 1000) ? cameraY += 0.2f : cameraY = 0;
+    (cameraZ < 1400) ? cameraZ += 0.3f : cameraZ = 0;
 
     viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
     modelMatrix = translationMatrix * rotationMatrix;
@@ -250,8 +250,8 @@ int main(int, char**){
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-//    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-//
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
@@ -309,16 +309,27 @@ int main(int, char**){
         }
 
         {
+            ImGui::SetNextWindowPos( ImVec2(0,50), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(220, 100), ImGuiCond_Always);
+            ImGui::Begin("Camera");
+            ImGui::SliderFloat("X", &cameraX, 0, 1400);
+            ImGui::SliderFloat("Y", &cameraY, 0, 1400);
+            ImGui::SliderFloat("Z", &cameraZ, 0, 1400);
+            ImGui::End();
+        }
+
+        {
             ImGui::SetNextWindowPos( ImVec2(230,0), ImGuiCond_Once);
             ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Once);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             {
+                ImGui::PopStyleVar();
                 // Using a Child allow to fill all the space of the window.
                 // It also allows customization
                 ImGui::BeginChild("Render");
                 // Get the size of the child (i.e. the whole draw size of the windows).
                 ImVec2 wsize = ImGui::GetWindowSize();
-                spdlog::info("X/Y: {}x{}", wsize.x, wsize.y);
 
                 try {
                     display(window, glfwGetTime(), wsize);
@@ -339,10 +350,10 @@ int main(int, char**){
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color.x * clear_color.w,
-                     clear_color.y * clear_color.w,
-                     clear_color.z * clear_color.w,
-                     clear_color.w);
+        glClearColor(clear_color.x,
+                     clear_color.y,
+                     clear_color.z,
+                     1);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
