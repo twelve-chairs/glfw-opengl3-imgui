@@ -143,7 +143,6 @@ void display(GLFWwindow* window, double currentTime){
     aspect = (float)width / (float)height;
     perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
-    if ()
     cameraX = (cameraX < 1) ? cameraX + 0.3f : cameraX - 0.3f;
     cameraY = (cameraY < 1) ? cameraY + 0.3f : cameraY - 0.3f;
     cameraZ = (cameraZ < 1) ? cameraZ + 0.3f : cameraZ - 0.3f;
@@ -214,18 +213,18 @@ int main(int, char**){
     glfwSwapInterval(1); // Enable vsync
 
 //    // Setup Dear ImGui context
-//    IMGUI_CHECKVERSION();
-//    ImGui::CreateContext();
-//    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
 //    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 //    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 //
 //    // Setup Dear ImGui style
-//    ImGui::StyleColorsLight();
+    ImGui::StyleColorsLight();
 //
 //    // Setup Platform/Renderer backends
-//    ImGui_ImplGlfw_InitForOpenGL(window, true);
-//    ImGui_ImplOpenGL3_Init(glsl_version);
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(NULL);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -258,76 +257,77 @@ int main(int, char**){
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
-        display(window, glfwGetTime());
 
 //        // Start the Dear ImGui frame
-//        ImGui_ImplOpenGL3_NewFrame();
-//        ImGui_ImplGlfw_NewFrame();
-//        ImGui::NewFrame();
-//
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        //
 //        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-//        if (show_demo_window)
-//            ImGui::ShowDemoWindow(&show_demo_window);
-//
-//        {
-//            ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
-//            ImGui::SetNextWindowSize(ImVec2(220, 50), ImGuiCond_Always);
-//            ImGui::Begin("Stats");
-//            ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-//            ImGui::End();
-//        }
-//
-//        {
-//            ImGui::SetNextWindowPos( ImVec2(230,0), ImGuiCond_Once);
-//            ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Once);
-//            ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-//            {
-//        // Using a Child allow to fill all the space of the window.
-//        // It also allows customization
-//                ImGui::BeginChild("Render");
-//        // Get the size of the child (i.e. the whole draw size of the windows).
-//                ImVec2 wsize = ImGui::GetWindowSize();
-//
-//                try {
-//                    display(window, glfwGetTime());
-//                }
-//                catch (std::exception &e){
-//                    spdlog::error("createTexture: {}", e.what());
-//                }
-//
-//                try {
-//                    ImGui::Image(reinterpret_cast<ImTextureID>(2), wsize);
-//        // Because I use the texture from OpenGL, I need to invert the V from the UV.
-//        // ImGui::Image(reinterpret_cast<ImTextureID>(0), wsize, ImVec2(0, 1), ImVec2(1, 0));
-//                }
-//                catch (std::exception &e){
-//                    spdlog::error("ImGui::Image: {}", e.what());
-//                }
-//
-//                ImGui::EndChild();
-//            }
-//            ImGui::End();
-//        }
-//
+        if (show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
+
+        {
+            ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(220, 50), ImGuiCond_Always);
+            ImGui::Begin("Stats");
+            ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+
+        {
+            ImGui::SetNextWindowPos( ImVec2(230,0), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Once);
+            ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            {
+                // Using a Child allow to fill all the space of the window.
+                // It also allows customization
+                ImGui::BeginChild("Render");
+                // Get the size of the child (i.e. the whole draw size of the windows).
+                ImVec2 wsize = ImGui::GetWindowSize();
+
+                try {
+                    display(window, glfwGetTime());
+                }
+                catch (std::exception &e){
+                    spdlog::error("createTexture: {}", e.what());
+                }
+
+                try {
+                    ImGui::Image(reinterpret_cast<ImTextureID>(2), wsize);
+                    // Because I use the texture from OpenGL, I need to invert the V from the UV.
+                    // ImGui::Image(reinterpret_cast<ImTextureID>(0), wsize, ImVec2(0, 1), ImVec2(1, 0));
+                }
+                catch (std::exception &e){
+                    spdlog::error("ImGui::Image: {}", e.what());
+                }
+
+                ImGui::EndChild();
+            }
+            ImGui::End();
+        }
+
 //        // Rendering
-//        ImGui::Render();
-//        int display_w, display_h;
-//        glfwGetFramebufferSize(window, &display_w, &display_h);
-//        glViewport(0, 0, display_w, display_h);
-//        glClearColor(clear_color.x * clear_color.w,
-//                     clear_color.y * clear_color.w,
-//                     clear_color.z * clear_color.w,
-//                     clear_color.w);
-//        glClear(GL_COLOR_BUFFER_BIT);
-//        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui::Render();
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color.x * clear_color.w,
+                     clear_color.y * clear_color.w,
+                     clear_color.z * clear_color.w,
+                     clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//        display(window, glfwGetTime());
 
         glfwSwapBuffers(window);
     }
 
 //    // Cleanup
-//    ImGui_ImplOpenGL3_Shutdown();
-//    ImGui_ImplGlfw_Shutdown();
-//    ImGui::DestroyContext();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
