@@ -255,7 +255,7 @@ int main(int, char**){
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -279,7 +279,7 @@ int main(int, char**){
     // Our state
     bool show_demo_window = false;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.32f, 0.32f, 0.32f, 1.00f);
 
     init(window);
 
@@ -349,7 +349,8 @@ int main(int, char**){
         // Rendering
         ImGui::Render();
 
-        int display_w, display_h;
+        int display_w;
+        int display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x,
