@@ -13,7 +13,7 @@
 #endif
 
 #define numVAOs 1
-#define numVBOs 1
+#define numVBOs 2
 
 GLuint vertexArrayObjects[numVAOs];
 GLuint vertexBuffersObject[numVBOs];
@@ -24,6 +24,7 @@ GLuint renderedTexture = 0;
 
 static float cameraX, cameraY, cameraZ;
 static float cubeLocationX, cubeLocationY, cubeLocationZ;
+static float pyramidLocationX, pyramidLocationY, pyramidLocationZ;
 
 GLuint viewLocation, modelViewMatrixLocation, projectionLocation, timeFrameLocation;
 int width, height;
@@ -37,8 +38,8 @@ static void glfw_error_callback(int error, const char* description)
 }
 
 
-void setupVertices(void){
-    float vertexPositions[108] = {
+void setupVertices(){
+    const float cubePositions[108] = {
             -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
             1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
             1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
@@ -52,12 +53,27 @@ void setupVertices(void){
             -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
             1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f
     };
+    // pyramid with 18 vertices, comprising 6 triangles (four sides, and two on the bottom)
+    const float pyramidPositions[54] = {
+            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // front face
+            1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // right face
+            1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // back face
+            -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left face
+            -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, // base – left front
+            1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f // base – right back
+    };
     glGenVertexArrays(1, vertexArrayObjects);
     glBindVertexArray(vertexArrayObjects[0]);
     glGenBuffers(numVBOs, vertexBuffersObject);
 
+    // Cube
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubePositions), cubePositions, GL_STATIC_DRAW);
+
+    // Pyramid
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pyramidPositions), pyramidPositions, GL_STATIC_DRAW);
+
     spdlog::info("setupVertices");
 }
 
@@ -143,16 +159,25 @@ void initFrameBuffer(){
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void windowResizeCallback(GLFWwindow* window, int newWidth, int newHeight){
+    glfwGetFramebufferSize(window, &newWidth, &newHeight);
+    aspect = (float)newWidth / (float)newHeight;
+    perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
+}
+
 void init(GLFWwindow* window){
     renderingProgram = createShaderProgram();
-    cameraX = 0.0f;
-    cameraY = 0.0f;
-    cameraZ = 420.0f;
+    cameraX = 6.4f;
+    cameraY = 1.9f;
+    cameraZ = 10.0f;
     cubeLocationX = 0.0f;
     cubeLocationY = -2.0f;
     cubeLocationZ = 0.0f;
     setupVertices();
     initFrameBuffer();
+    glfwGetFramebufferSize(window, &width, &height);
+    aspect = (float)width / (float)height;
+    perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
     spdlog::info("init");
 }
 
@@ -171,29 +196,59 @@ void display(GLFWwindow* window, double currentTime){
     projectionLocation = glGetUniformLocation(renderingProgram, "proj_matrix");
     timeFrameLocation = glGetUniformLocation(renderingProgram, "tf");
 
-    glfwGetFramebufferSize(window, &width, &height);
-    aspect = (float)width / (float)height;
-    perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
-
 //    (cameraX < 1000) ? cameraX += 0.1f : cameraX = 0;
 //    (cameraY < 1000) ? cameraY += 0.2f : cameraY = 0;
 //    (cameraZ < 1300) ? cameraZ += 0.3f : cameraZ = 0;
 
+    // the view matrix is computed once and used for both objects
     viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-    modelMatrix = translationMatrix * rotationMatrix;
+
+    // draw the cube (use buffer #0)
+    modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(cubeLocationX, cubeLocationY, cubeLocationZ));
+    modelViewMatrix = viewMatrix * modelMatrix;
+
+    glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
 
-    glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-    auto timeFactor = ((float)currentTime);
-    glUniform1f(timeFrameLocation, (float)timeFactor);
-
-//    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // draw the pyramid (use buffer #1)
+    modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pyramidLocationX, pyramidLocationY, pyramidLocationZ));
+    modelViewMatrix = viewMatrix * modelMatrix;
+
+    glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
+    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[1]);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDrawArrays(GL_TRIANGLES, 0, 18);
+
+
+    // Animated pyramids
+//    modelMatrix = translationMatrix * rotationMatrix;
+//    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
+//
+//    glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+//    auto timeFactor = ((float)currentTime);
+//    glUniform1f(timeFrameLocation, (float)timeFactor);
+//
+////    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[randomInteger(1)]);
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//    glEnableVertexAttribArray(0);
+//
+//    glEnable(GL_DEPTH_TEST);
+//    glDepthFunc(GL_LEQUAL);
+//    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -233,7 +288,7 @@ int main(int, char**){
     }
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1000, 800, "glfw-opengl3-imgui", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1300, 900, "glfw-opengl3-imgui", NULL, NULL);
     if (window == NULL) {
         spdlog::error("glfwCreateWindow");
         return 1;
@@ -247,7 +302,7 @@ int main(int, char**){
 
     glfwSwapInterval(1); // Enable vsync
 
-//    // Setup Dear ImGui context
+    // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -279,8 +334,9 @@ int main(int, char**){
     // Our state
     bool show_demo_window = false;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.32f, 0.32f, 0.32f, 1.00f);
+    ImVec4 mainBackgroundColor = ImVec4(0.32f, 0.56f, 0.86f, 1.00f);
 
+    glfwSetWindowSizeCallback(window, windowResizeCallback);
     init(window);
 
     // Main loop
@@ -312,11 +368,31 @@ int main(int, char**){
 
         {
             ImGui::SetNextWindowPos( ImVec2(0,50), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 100), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
             ImGui::Begin("Camera");
-            ImGui::SliderFloat("X", &cameraX, 0, 1000);
-            ImGui::SliderFloat("Y", &cameraY, 0, 1000);
-            ImGui::SliderFloat("Z", &cameraZ, 0, 1300);
+            ImGui::SliderFloat("X", &cameraX, -10, 10);
+            ImGui::SliderFloat("Y", &cameraY, -10, 10);
+            ImGui::SliderFloat("Z", &cameraZ, -10, 10);
+            ImGui::End();
+        }
+
+        {
+            ImGui::SetNextWindowPos( ImVec2(0,170), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
+            ImGui::Begin("Cube");
+            ImGui::SliderFloat("X", &cubeLocationX, -2, 2);
+            ImGui::SliderFloat("Y", &cubeLocationY, -2, 2);
+            ImGui::SliderFloat("Z", &cubeLocationZ, -2, 2);
+            ImGui::End();
+        }
+
+        {
+            ImGui::SetNextWindowPos( ImVec2(0,290), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
+            ImGui::Begin("Pyramid");
+            ImGui::SliderFloat("X", &pyramidLocationX, -2, 2);
+            ImGui::SliderFloat("Y", &pyramidLocationY, -2, 2);
+            ImGui::SliderFloat("Z", &pyramidLocationZ, -2, 2);
             ImGui::End();
         }
 
@@ -353,10 +429,7 @@ int main(int, char**){
         int display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color.x,
-                     clear_color.y,
-                     clear_color.z,
-                     1);
+        glClearColor(mainBackgroundColor.x, mainBackgroundColor.y, mainBackgroundColor.z, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
