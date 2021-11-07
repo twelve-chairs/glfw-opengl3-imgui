@@ -116,14 +116,14 @@ GLuint createShaderProgram(){
 }
 
 
-void initFrameBuffer(ImVec2 wsize){
+void initFrameBuffer(){
     glGenFramebuffers(1, &frameBufferObject);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
     // generate texture
     unsigned int textureColorbuffer;
     glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, wsize.x, wsize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -133,12 +133,13 @@ void initFrameBuffer(ImVec2 wsize){
 
     glGenRenderbuffers(1, &renderBufferObject);
     glBindRenderbuffer(GL_RENDERBUFFER, renderBufferObject);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, wsize.x, wsize.y);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferObject);
 
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+    }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -151,11 +152,12 @@ void init(GLFWwindow* window){
     cubeLocationY = -2.0f;
     cubeLocationZ = 0.0f;
     setupVertices();
+    initFrameBuffer();
     spdlog::info("init");
 }
 
-void display(GLFWwindow* window, double currentTime, ImVec2 wsize){
-    initFrameBuffer(wsize);
+void display(GLFWwindow* window, double currentTime){
+
     glClearColor( 0.0f , 0.0f , 0.0f , 1.0f );
     glClear(GL_FRAMEBUFFER);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
@@ -173,9 +175,9 @@ void display(GLFWwindow* window, double currentTime, ImVec2 wsize){
     aspect = (float)width / (float)height;
     perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
-    (cameraX < 1000) ? cameraX += 0.1f : cameraX = 0;
-    (cameraY < 1000) ? cameraY += 0.2f : cameraY = 0;
-    (cameraZ < 1300) ? cameraZ += 0.3f : cameraZ = 0;
+//    (cameraX < 1000) ? cameraX += 0.1f : cameraX = 0;
+//    (cameraY < 1000) ? cameraY += 0.2f : cameraY = 0;
+//    (cameraZ < 1300) ? cameraZ += 0.3f : cameraZ = 0;
 
     viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
     modelMatrix = translationMatrix * rotationMatrix;
@@ -277,7 +279,7 @@ int main(int, char**){
     // Our state
     bool show_demo_window = false;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
 
     init(window);
 
@@ -332,7 +334,7 @@ int main(int, char**){
                 ImVec2 wsize = ImGui::GetWindowSize();
 
                 try {
-                    display(window, glfwGetTime(), wsize);
+                    display(window, glfwGetTime());
                     ImGui::Image(reinterpret_cast<ImTextureID>(frameBufferObject), wsize, ImVec2(0, 1), ImVec2(1, 0));
                 }
                 catch (std::exception &e){
