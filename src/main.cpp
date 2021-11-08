@@ -37,7 +37,6 @@ static void glfw_error_callback(int error, const char* description)
     spdlog::error("Glfw Error {}: {}\n", error, description);
 }
 
-
 void setupVertices(){
     const float cubePositions[108] = {
             -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
@@ -76,7 +75,6 @@ void setupVertices(){
 
     spdlog::info("setupVertices");
 }
-
 
 GLuint createShaderProgram(){
     std::string vertexShaderString = readShaderSource("../src/include/vertexShader.glsl");
@@ -130,7 +128,6 @@ GLuint createShaderProgram(){
 
     return vfProgram;
 }
-
 
 void initFrameBuffer(){
     glGenFramebuffers(1, &frameBufferObject);
@@ -253,7 +250,6 @@ void display(GLFWwindow* window, double currentTime){
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-
 int main(int, char**){
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -359,46 +355,8 @@ int main(int, char**){
             ImGui::ShowDemoWindow(&show_demo_window);
 
         {
-            ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 50), ImGuiCond_Always);
-            ImGui::Begin("Stats");
-            ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
-        {
-            ImGui::SetNextWindowPos( ImVec2(0,50), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
-            ImGui::Begin("Camera");
-            ImGui::SliderFloat("X", &cameraX, -10, 10);
-            ImGui::SliderFloat("Y", &cameraY, -10, 10);
-            ImGui::SliderFloat("Z", &cameraZ, -10, 10);
-            ImGui::End();
-        }
-
-        {
-            ImGui::SetNextWindowPos( ImVec2(0,170), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
-            ImGui::Begin("Cube");
-            ImGui::SliderFloat("X", &cubeLocationX, -2, 2);
-            ImGui::SliderFloat("Y", &cubeLocationY, -2, 2);
-            ImGui::SliderFloat("Z", &cubeLocationZ, -2, 2);
-            ImGui::End();
-        }
-
-        {
-            ImGui::SetNextWindowPos( ImVec2(0,290), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
-            ImGui::Begin("Pyramid");
-            ImGui::SliderFloat("X", &pyramidLocationX, -2, 2);
-            ImGui::SliderFloat("Y", &pyramidLocationY, -2, 2);
-            ImGui::SliderFloat("Z", &pyramidLocationZ, -2, 2);
-            ImGui::End();
-        }
-
-        {
-            ImGui::SetNextWindowPos( ImVec2(230,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Once);
+            ImGui::SetNextWindowPos( ImVec2(220,0), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(1060, 860), ImGuiCond_Once);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             {
@@ -421,6 +379,45 @@ int main(int, char**){
             }
             ImGui::End();
         }
+
+        {
+            ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(220, 50), ImGuiCond_Always);
+            ImGui::Begin("Stats");
+            ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::End();
+        }
+
+        {
+            ImGui::SetNextWindowPos( ImVec2(0,50), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
+            ImGui::Begin("Camera");
+            ImGui::SliderFloat("X", &cameraX, -10, 10);
+            ImGui::SliderFloat("Y", &cameraY, -10, 10);
+            ImGui::SliderFloat("Z", &cameraZ, -10, 10);
+            ImGui::End();
+        }
+
+        {
+            ImGui::SetNextWindowPos( ImVec2(0,160), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
+            ImGui::Begin("Cube");
+            ImGui::SliderFloat("X", &cubeLocationX, -2, 2);
+            ImGui::SliderFloat("Y", &cubeLocationY, -2, 2);
+            ImGui::SliderFloat("Z", &cubeLocationZ, -2, 2);
+            ImGui::End();
+        }
+
+        {
+            ImGui::SetNextWindowPos( ImVec2(0,270), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
+            ImGui::Begin("Pyramid");
+            ImGui::SliderFloat("X", &pyramidLocationX, -2, 2);
+            ImGui::SliderFloat("Y", &pyramidLocationY, -2, 2);
+            ImGui::SliderFloat("Z", &pyramidLocationZ, -2, 2);
+            ImGui::End();
+        }
+
 
         // Rendering
         ImGui::Render();
