@@ -7,6 +7,8 @@
 
 
 #include <string>
+#include <cstdint>
+#include <bit>
 #include <random>
 #include <iostream>
 #include <fstream>

@@ -5,36 +5,16 @@
 
 #include "main.h"
 
-// [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
-// To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
-// Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
-#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
-#pragma comment(lib, "legacy_stdio_definitions")
-#endif
 
-#define numVAOs 1
-#define numVBOs 2
-
-GLuint vertexArrayObjects[numVAOs];
-GLuint vertexBuffersObject[numVBOs];
-
-GLuint frameBufferObject, renderBufferObject;
-GLuint renderingProgram = 0;
-GLuint renderedTexture = 0;
-
-static float cameraX, cameraY, cameraZ;
-static float cubeLocationX, cubeLocationY, cubeLocationZ;
-static float pyramidLocationX, pyramidLocationY, pyramidLocationZ;
-
-GLuint viewLocation, modelViewMatrixLocation, projectionLocation, timeFrameLocation;
-int width, height;
-static float aspect;
-glm::mat4 perspectiveMatrix, translationMatrix, rotationMatrix, viewMatrix, modelMatrix, modelViewMatrix;
-
-
-static void glfw_error_callback(int error, const char* description)
+static void glfwErrorCallback(int error, const char* description)
 {
     spdlog::error("Glfw Error {}: {}\n", error, description);
+}
+
+static void windowResizeCallback(GLFWwindow* window, int newWidth, int newHeight){
+    glfwGetFramebufferSize(window, &newWidth, &newHeight);
+    float newAspect = (float)newWidth / (float)newHeight;
+    perspectiveMatrix = glm::perspective(1.0472f, newAspect, 0.1f, 1000.0f);
 }
 
 void setupVertices(){
@@ -60,6 +40,16 @@ void setupVertices(){
             -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left face
             -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, // base – left front
             1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f // base – right back
+    };
+    float PLANE_POSITIONS[18] = {
+            -128.0f, 0.0f, -128.0f, -128.0f, 0.0f, 128.0f, 128.0f, 0.0f, -128.0f,
+            128.0f, 0.0f, -128.0f, -128.0f, 0.0f, 128.0f, 128.0f, 0.0f, 128.0f
+    };
+    float PLANE_TEXCOORDS[12] = {
+            0.0f, 0.0f, 0.0f,
+            1.0f, 1.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            1.0f, 1.0f, 1.0f
     };
     glGenVertexArrays(1, vertexArrayObjects);
     glBindVertexArray(vertexArrayObjects[0]);
@@ -136,7 +126,7 @@ void initFrameBuffer(){
     unsigned int textureColorbuffer;
     glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -156,17 +146,11 @@ void initFrameBuffer(){
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void windowResizeCallback(GLFWwindow* window, int newWidth, int newHeight){
-    glfwGetFramebufferSize(window, &newWidth, &newHeight);
-    aspect = (float)newWidth / (float)newHeight;
-    perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
-}
-
 void init(GLFWwindow* window){
     renderingProgram = createShaderProgram();
-    cameraX = 4.4f;
-    cameraY = 2.7f;
-    cameraZ = 10.0f;
+    cameraPositionX = 4.4f;
+    cameraPositionY = 2.7f;
+    cameraPositionZ = 10.0f;
     cubeLocationX = 0.667f;
     cubeLocationY = 2.0f;
     cubeLocationZ = 0.0f;
@@ -196,27 +180,30 @@ void display(GLFWwindow* window, double currentTime){
     projectionLocation = glGetUniformLocation(renderingProgram, "proj_matrix");
     timeFrameLocation = glGetUniformLocation(renderingProgram, "tf");
 
-//    (cameraX < 1000) ? cameraX += 0.1f : cameraX = 0;
-//    (cameraY < 1000) ? cameraY += 0.2f : cameraY = 0;
-//    (cameraZ < 1300) ? cameraZ += 0.3f : cameraZ = 0;
+//    (cameraPositionX < 1000) ? cameraPositionX += 0.1f : cameraPositionX = 0;
+//    (cameraPositionY < 1000) ? cameraPositionY += 0.2f : cameraPositionY = 0;
+//    (cameraPositionZ < 1300) ? cameraPositionZ += 0.3f : cameraPositionZ = 0;
 
     // the view matrix is computed once and used for both objects
-    viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
+    viewMatrix = glm::translate(
+            glm::mat4(1.0f), glm::vec3(0.0f, -cameraHeight, 0.0f))
+            *
+            glm::rotate(glm::mat4(1.0f), glm::radians(cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f));
 
     // draw the cube (use buffer #0)
-    modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(cubeLocationX, cubeLocationY, cubeLocationZ));
+    modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, planeHeight, 0));
     modelViewMatrix = viewMatrix * modelMatrix;
 
     glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelViewMatrix));
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
 
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[0]);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // draw the pyramid (use buffer #1)
     modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pyramidLocationX, pyramidLocationY, pyramidLocationZ));
@@ -226,13 +213,12 @@ void display(GLFWwindow* window, double currentTime){
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
 
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffersObject[1]);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_TRIANGLES, 0, 18);
-
 
     // Animated pyramids
 //    modelMatrix = translationMatrix * rotationMatrix;
@@ -255,7 +241,7 @@ void display(GLFWwindow* window, double currentTime){
 
 int main(int, char**){
     // Setup window
-    glfwSetErrorCallback(glfw_error_callback);
+    glfwSetErrorCallback(glfwErrorCallback);
     if (!glfwInit()){
         spdlog::error("glfwInit");
         return 1;
@@ -287,8 +273,8 @@ int main(int, char**){
     }
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1300, 900, "glfw-opengl3-imgui", NULL, NULL);
-    if (window == NULL) {
+    GLFWwindow* window = glfwCreateWindow(1300, 900, "glfw-opengl3-imgui", nullptr, nullptr);
+    if (window == nullptr) {
         spdlog::error("glfwCreateWindow");
         return 1;
     }
@@ -333,7 +319,7 @@ int main(int, char**){
     // Our state
     bool show_demo_window = false;
     bool show_another_window = false;
-    ImVec4 mainBackgroundColor = ImVec4(0.32f, 0.56f, 0.86f, 1.00f);
+    auto mainBackgroundColor = ImVec4(0.32f, 0.56f, 0.86f, 1.00f);
 
     glfwSetWindowSizeCallback(window, windowResizeCallback);
     init(window);
@@ -354,73 +340,69 @@ int main(int, char**){
         ImGui::NewFrame();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
+        if (show_demo_window) {
             ImGui::ShowDemoWindow(&show_demo_window);
-
-        {
-            ImGui::SetNextWindowPos( ImVec2(220,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(1060, 860), ImGuiCond_Once);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-            ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            {
-                ImGui::PopStyleVar();
-                // Using a Child allow to fill all the space of the window.
-                // It also allows customization
-                ImGui::BeginChild("Render");
-                // Get the size of the child (i.e. the whole draw size of the windows).
-                ImVec2 wsize = ImGui::GetWindowSize();
-
-                try {
-                    display(window, glfwGetTime());
-                    ImGui::Image(reinterpret_cast<ImTextureID>(frameBufferObject), wsize, ImVec2(0, 1), ImVec2(1, 0));
-                }
-                catch (std::exception &e){
-                    spdlog::error("ImGui::Image: {}", e.what());
-                }
-
-                ImGui::EndChild();
-            }
-            ImGui::End();
         }
 
-        {
-            ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 50), ImGuiCond_Always);
-            ImGui::Begin("Stats");
-            ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
+        // OpenGL window
+        ImGui::SetNextWindowPos( ImVec2(220,0), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(1060, 860), ImGuiCond_Once);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::PopStyleVar();
+        // Using a Child allow to fill all the space of the window.
+        // It also allows customization
+        ImGui::BeginChild("Render");
+        // Get the size of the child (i.e. the whole draw size of the windows).
+        ImVec2 wsize = ImGui::GetWindowSize();
+        try {
+            display(window, glfwGetTime());
+            ImGui::Image(reinterpret_cast<ImTextureID>(frameBufferObject), wsize, ImVec2(0, 1), ImVec2(1, 0));
+        }
+        catch (std::exception &e){
+            spdlog::error("ImGui::Image: {}", e.what());
         }
 
-        {
-            ImGui::SetNextWindowPos( ImVec2(0,50), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
-            ImGui::Begin("Camera");
-            ImGui::SliderFloat("X", &cameraX, -10, 10);
-            ImGui::SliderFloat("Y", &cameraY, -10, 10);
-            ImGui::SliderFloat("Z", &cameraZ, -10, 10);
-            ImGui::End();
-        }
+        ImGui::EndChild();
+        ImGui::End();
 
-        {
-            ImGui::SetNextWindowPos( ImVec2(0,160), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
-            ImGui::Begin("Cube");
-            ImGui::SliderFloat("X", &cubeLocationX, -2, 2);
-            ImGui::SliderFloat("Y", &cubeLocationY, -2, 2);
-            ImGui::SliderFloat("Z", &cubeLocationZ, -2, 2);
-            ImGui::End();
-        }
 
-        {
-            ImGui::SetNextWindowPos( ImVec2(0,270), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
-            ImGui::Begin("Pyramid");
-            ImGui::SliderFloat("X", &pyramidLocationX, -2, 2);
-            ImGui::SliderFloat("Y", &pyramidLocationY, -2, 2);
-            ImGui::SliderFloat("Z", &pyramidLocationZ, -2, 2);
-            ImGui::End();
-        }
+        // Stats window
+        ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(220, 50), ImGuiCond_Always);
+        ImGui::Begin("Stats");
+        ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
 
+        // Camera window
+        ImGui::SetNextWindowPos( ImVec2(0,50), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(220, 160), ImGuiCond_Always);
+        ImGui::Begin("Camera");
+        ImGui::SliderFloat("X", &cameraPositionX, -10, 10);
+        ImGui::SliderFloat("Y", &cameraPositionY, -10, 10);
+        ImGui::SliderFloat("Z", &cameraPositionZ, -10, 10);
+        ImGui::SliderFloat("Height", &cameraHeight, -2, 2);
+        ImGui::SliderFloat("Pitch", &cameraPitch, -90, 90);
+        ImGui::SliderFloat("Aspect", &aspect, -10, 10);
+        ImGui::End();
+
+//        // Cube window
+//        ImGui::SetNextWindowPos( ImVec2(0,160), ImGuiCond_Once);
+//        ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
+//        ImGui::Begin("Cube");
+//        ImGui::SliderFloat("X", &cubeLocationX, -2, 2);
+//        ImGui::SliderFloat("Y", &cubeLocationY, -2, 2);
+//        ImGui::SliderFloat("Z", &cubeLocationZ, -2, 2);
+//        ImGui::End();
+//
+//        // Pyramid window
+//        ImGui::SetNextWindowPos( ImVec2(0,270), ImGuiCond_Once);
+//        ImGui::SetNextWindowSize(ImVec2(220, 110), ImGuiCond_Always);
+//        ImGui::Begin("Pyramid");
+//        ImGui::SliderFloat("X", &pyramidLocationX, -2, 2);
+//        ImGui::SliderFloat("Y", &pyramidLocationY, -2, 2);
+//        ImGui::SliderFloat("Z", &pyramidLocationZ, -2, 2);
+//        ImGui::End();
 
         // Rendering
         ImGui::Render();
@@ -428,7 +410,7 @@ int main(int, char**){
         int display_w;
         int display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h);
+        glViewport(0, 3, display_w, display_h);
         glClearColor(mainBackgroundColor.x, mainBackgroundColor.y, mainBackgroundColor.z, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
