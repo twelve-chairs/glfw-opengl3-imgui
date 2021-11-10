@@ -164,12 +164,15 @@ void windowResizeCallback(GLFWwindow* window, int newWidth, int newHeight){
 
 void init(GLFWwindow* window){
     renderingProgram = createShaderProgram();
-    cameraX = 6.4f;
-    cameraY = 1.9f;
+    cameraX = 4.4f;
+    cameraY = 2.7f;
     cameraZ = 10.0f;
-    cubeLocationX = 0.0f;
-    cubeLocationY = -2.0f;
+    cubeLocationX = 0.667f;
+    cubeLocationY = 2.0f;
     cubeLocationZ = 0.0f;
+    pyramidLocationX = 1.473f;
+    pyramidLocationY = 0.63f;
+    pyramidLocationZ = 1.56f;
     setupVertices();
     initFrameBuffer();
     glfwGetFramebufferSize(window, &width, &height);
