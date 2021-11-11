@@ -1,10 +1,29 @@
-// Dear ImGui: standalone example application for GLFW + OpenGL 3, using programmable pipeline
-// (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
-// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
-// Read online: https://github.com/ocornut/imgui/tree/master/docs
-
 #include "main.h"
 
+void glslSetup(){
+        // Decide GL+GLSL versions
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+        // GL ES 2.0 + GLSL 100
+        const char* glsl_version = "#version 100";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
+        // GL 3.2 + GLSL 150
+        glsl_version = "#version 150";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+#else
+        // GL 3.0 + GLSL 130
+        const char* glsl_version = "#version 130";
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+        //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+#endif
+}
 
 static void glfwErrorCallback(int error, const char* description)
 {
@@ -119,24 +138,23 @@ GLuint createShaderProgram(){
     return vfProgram;
 }
 
-void initFrameBuffer(){
+GLuint initFrameBuffer(){
     glGenFramebuffers(1, &frameBufferObject);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
     // generate texture
-    unsigned int textureColorbuffer;
-    glGenTextures(1, &textureColorbuffer);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glGenTextures(1, &textureColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameBufferSize.x, frameBufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // attach it to currently bound framebuffer object
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer, 0);
 
     glGenRenderbuffers(1, &renderBufferObject);
     glBindRenderbuffer(GL_RENDERBUFFER, renderBufferObject);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameBufferSize.x, frameBufferSize.y);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferObject);
 
@@ -144,21 +162,26 @@ void initFrameBuffer(){
         spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return frameBufferObject;
 }
 
 void init(GLFWwindow* window){
     renderingProgram = createShaderProgram();
-    cameraPositionX = 4.4f;
-    cameraPositionY = 2.7f;
-    cameraPositionZ = 10.0f;
+    cameraPositionX = 0.0f;
+    cameraPositionY = 0.0f;
+    cameraPositionZ = 5.0f;
     cubeLocationX = 0.667f;
     cubeLocationY = 2.0f;
     cubeLocationZ = 0.0f;
     pyramidLocationX = 1.473f;
     pyramidLocationY = 0.63f;
     pyramidLocationZ = 1.56f;
+
+    frameBufferSize = ImVec2(800, 600);
+
     setupVertices();
     initFrameBuffer();
+
     glfwGetFramebufferSize(window, &width, &height);
     aspect = (float)width / (float)height;
     perspectiveMatrix = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
@@ -166,11 +189,6 @@ void init(GLFWwindow* window){
 }
 
 void display(GLFWwindow* window, double currentTime){
-
-    glClearColor( 0.0f , 0.0f , 0.0f , 1.0f );
-    glClear(GL_FRAMEBUFFER);
-    glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
-
     glClear(GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(renderingProgram);
@@ -180,15 +198,11 @@ void display(GLFWwindow* window, double currentTime){
     projectionLocation = glGetUniformLocation(renderingProgram, "proj_matrix");
     timeFrameLocation = glGetUniformLocation(renderingProgram, "tf");
 
-//    (cameraPositionX < 1000) ? cameraPositionX += 0.1f : cameraPositionX = 0;
-//    (cameraPositionY < 1000) ? cameraPositionY += 0.2f : cameraPositionY = 0;
-//    (cameraPositionZ < 1300) ? cameraPositionZ += 0.3f : cameraPositionZ = 0;
-
     // the view matrix is computed once and used for both objects
     viewMatrix = glm::translate(
             glm::mat4(1.0f), glm::vec3(0.0f, -cameraHeight, 0.0f))
-            *
-            glm::rotate(glm::mat4(1.0f), glm::radians(cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f));
+                 *
+                 glm::rotate(glm::mat4(1.0f), glm::radians(cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f));
 
     // draw the cube (use buffer #0)
     modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, planeHeight, 0));
@@ -219,8 +233,8 @@ void display(GLFWwindow* window, double currentTime){
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glDrawArrays(GL_TRIANGLES, 0, 18);
-
-    // Animated pyramids
+//
+//    // Animated pyramids
 //    modelMatrix = translationMatrix * rotationMatrix;
 //    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(perspectiveMatrix));
 //
@@ -235,8 +249,6 @@ void display(GLFWwindow* window, double currentTime){
 //    glEnable(GL_DEPTH_TEST);
 //    glDepthFunc(GL_LEQUAL);
 //    glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 int main(int, char**){
@@ -247,30 +259,7 @@ int main(int, char**){
         return 1;
     }
 
-    {
-        // Decide GL+GLSL versions
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-        // GL ES 2.0 + GLSL 100
-        const char* glsl_version = "#version 100";
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#elif defined(__APPLE__)
-        // GL 3.2 + GLSL 150
-        glsl_version = "#version 150";
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#else
-        // GL 3.0 + GLSL 130
-        const char* glsl_version = "#version 130";
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-        //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-#endif
-    }
+    glslSetup();
 
     // Create window with graphics context
     GLFWwindow* window = glfwCreateWindow(1300, 900, "glfw-opengl3-imgui", nullptr, nullptr);
@@ -292,7 +281,6 @@ int main(int, char**){
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsLight();
@@ -300,21 +288,6 @@ int main(int, char**){
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
-
-    // // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
 
     // Our state
     bool show_demo_window = false;
@@ -350,14 +323,30 @@ int main(int, char**){
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
         ImGui::PopStyleVar();
-        // Using a Child allow to fill all the space of the window.
-        // It also allows customization
         ImGui::BeginChild("Render");
-        // Get the size of the child (i.e. the whole draw size of the windows).
-        ImVec2 wsize = ImGui::GetWindowSize();
+
         try {
+            ImVec2 avail_size = ImGui::GetContentRegionAvail();
+            if (frameBufferSize.x != avail_size.x || frameBufferSize.y != avail_size.y){
+                frameBufferSize.x = avail_size.x;
+                frameBufferSize.y = avail_size.y;
+                glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameBufferSize.x, frameBufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glBindTexture(GL_TEXTURE_2D, 0);
+
+                glBindRenderbuffer(GL_RENDERBUFFER, renderBufferObject);
+                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameBufferSize.x, frameBufferSize.y);
+                glBindRenderbuffer(GL_RENDERBUFFER, 0);
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferObject);
+            }
+            glClearColor( 0.0f , 0.0f , 0.0f , 1.0f );
+            glClear(GL_FRAMEBUFFER);
+            glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
             display(window, glfwGetTime());
-            ImGui::Image(reinterpret_cast<ImTextureID>(frameBufferObject), wsize, ImVec2(0, 1), ImVec2(1, 0));
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            ImGui::Image(reinterpret_cast<ImTextureID>(frameBufferObject), frameBufferSize, ImVec2(0, 1), ImVec2(1, 0));
         }
         catch (std::exception &e){
             spdlog::error("ImGui::Image: {}", e.what());
@@ -376,13 +365,13 @@ int main(int, char**){
 
         // Camera window
         ImGui::SetNextWindowPos( ImVec2(0,50), ImGuiCond_Once);
-        ImGui::SetNextWindowSize(ImVec2(220, 160), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(220, 170), ImGuiCond_Always);
         ImGui::Begin("Camera");
         ImGui::SliderFloat("X", &cameraPositionX, -10, 10);
         ImGui::SliderFloat("Y", &cameraPositionY, -10, 10);
         ImGui::SliderFloat("Z", &cameraPositionZ, -10, 10);
         ImGui::SliderFloat("Height", &cameraHeight, -2, 2);
-        ImGui::SliderFloat("Pitch", &cameraPitch, -90, 90);
+        ImGui::SliderFloat("Pitch", &cameraPitch, -180, 180);
         ImGui::SliderFloat("Aspect", &aspect, -10, 10);
         ImGui::End();
 
@@ -410,7 +399,7 @@ int main(int, char**){
         int display_w;
         int display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
-        glViewport(0, 3, display_w, display_h);
+        glViewport(0, 0, display_w, display_h);
         glClearColor(mainBackgroundColor.x, mainBackgroundColor.y, mainBackgroundColor.z, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

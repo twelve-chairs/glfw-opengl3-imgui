@@ -17,12 +17,15 @@
 #define numVAOs 1
 #define numVBOs 2
 
+const char *glsl_version;
+
 GLuint vertexArrayObjects[numVAOs];
 GLuint vertexBuffersObject[numVBOs];
 
 GLuint frameBufferObject, renderBufferObject;
 GLuint renderingProgram = 0;
 GLuint renderedTexture = 0;
+unsigned int textureColorBuffer;
 
 static float cameraPositionX;
 static float cameraPositionY;
@@ -40,6 +43,8 @@ static float pyramidLocationX;
 static float pyramidLocationY;
 static float pyramidLocationZ;
 
+ImVec2 frameBufferSize;
+
 GLuint viewLocation;
 GLuint modelViewMatrixLocation;
 GLuint projectionLocation;
@@ -48,14 +53,13 @@ GLuint timeFrameLocation;
 int width;
 int height;
 static float aspect;
-glm::mat4 perspectiveMatrix, translationMatrix, rotationMatrix, viewMatrix, modelMatrix, modelViewMatrix;
-
-const char *glsl_version;
+glm::mat4 perspectiveMatrix;
+glm::mat4 translationMatrix;
+glm::mat4 rotationMatrix;
+glm::mat4 viewMatrix;
+glm::mat4 modelMatrix;
+glm::mat4 modelViewMatrix;
 
 float cameraHeight = 1.0f;
 float cameraPitch = 45.0f;
 float planeHeight = 0.0f;
-
-
-//The easy and flexible way is to render to texture (which is something you can figure out on OpenGL side, it's
-//not really an ImGui thing). Once you have a texture you can just call ImGui::Image() with your texture identifier.
