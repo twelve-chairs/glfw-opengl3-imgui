@@ -30,6 +30,8 @@ conan_cmake_configure(REQUIRES cmake/3.21.3
         glew/2.2.0
         imgui/1.84.2
         glm/0.9.9.8
+        tinyobjloader/1.0.6
+        stb/cci.20210713
         spdlog/1.9.2
         GENERATORS cmake cmake_paths cmake_find_package)
 conan_cmake_autodetect(settings)
@@ -43,6 +45,8 @@ find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(imgui REQUIRED)
 find_package(glm REQUIRED)
+find_package(tinyobjloader REQUIRED)
+find_package(stb REQUIRED)
 find_package(spdlog REQUIRED)
 
 file(GLOB H_FILES "src/*.h")
@@ -51,4 +55,11 @@ file(GLOB INCLUDE "src/include/*.*")
 
 add_executable(${PROJECT_NAME} ${H_FILES} ${CPP_FILES} ${INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW glfw::glfw imgui::imgui glm::glm spdlog::spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        GLEW::GLEW
+        glfw::glfw
+        imgui::imgui
+        glm::glm
+        tinyobjloader::tinyobjloader
+        stb::stb
+        spdlog::spdlog)
