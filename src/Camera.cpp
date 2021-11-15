@@ -46,7 +46,7 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_siz
     // [2021-11-14 17:04:53.910] [info] screen_pos: 147x153
 
     ImVec4 window_size = ImVec4(window_position.x, window_position.y, window_position.x + avail_size.x, window_position.y + avail_size.y);
-    spdlog::info("{} x {}, {} x {}", window_position.x, window_position.y, window_position.x + avail_size.x, window_position.y + avail_size.y);
+//    spdlog::info("{} x {}, {} x {}", window_position.x, window_position.y, window_position.x + avail_size.x, window_position.y + avail_size.y);
     // Handles key inputs
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
@@ -89,32 +89,30 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_siz
         double mouseY;
 
         glfwGetCursorPos(window, &mouseX, &mouseY);
-        std::cout << ((window_size.x < mouseX && mouseX < window_size.z) || (window_size.y > mouseY && mouseY > window_size.w)) << std::endl;
         if ((window_size.x < mouseX && mouseX < window_size.z) || (window_size.y > mouseY && mouseY > window_size.w)){
-        // Hides mouse cursor
+            // Hides mouse cursor
 //        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-        // Prevents camera from jumping on the first click
-        if (firstClick)
-        {
-            float z = window_size.z / 2;
-            float w = window_size.w / 2;
-            spdlog::info("Size: z{} x w{}", z, w);
+            // Prevents camera from jumping on the first click
+            if (firstClick)
+            {
+                float z = window_size.z / 2;
+                float w = window_size.w / 2;
+//            spdlog::info("Size: z{} x w{}", z, w);
 //            glfwSetCursorPos(window, (z / 2), (w / 2));
-            firstClick = false;
-        }
+                firstClick = false;
+            }
 
-        // Stores the coordinates of the cursor
+            // Stores the coordinates of the cursor
 
-        float padding = 20.0f;
-        window_size.x += padding;
-        window_size.y -= padding;
-        window_size.z += padding;
-        window_size.w -= padding;
+            float padding = 20.0f;
+            window_size.x += padding;
+            window_size.y -= padding;
+            window_size.z += padding;
+            window_size.w -= padding;
 
-        // Fetches the coordinates of the cursor
+            // Fetches the coordinates of the cursor
 
-            std::cout << "Helloooo?" << std::endl;
             // Normalizes and shifts the coordinates of the cursor such that they begin in the middle of the screen
             // and then "transforms" them into degrees
             float rotX = sensitivity * (float)(mouseY - (window_size.w / 2)) / window_size.w;

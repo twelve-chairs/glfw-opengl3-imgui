@@ -172,7 +172,6 @@ GLuint initFrameBuffer(){
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     renderedTexture = frameBufferObject;
-    spdlog::info(renderedTexture);
     return frameBufferObject;
 }
 
@@ -399,7 +398,6 @@ int main()
             ImGui::EndChild();
             ImGui::End();
 
-
             // Stats window
             ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
             ImGui::SetNextWindowSize(ImVec2(220, 70), ImGuiCond_Always);
@@ -426,10 +424,6 @@ int main()
             // Rendering
             ImGui::Render();
 
-//            int display_w;
-//            int display_h;
-//            glfwGetFramebufferSize(window, &display_w, &display_h);
-//            glViewport(0, 0, display_w, display_h);
             glClearColor(mainBackgroundColor.x, mainBackgroundColor.y, mainBackgroundColor.z, 1);
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
