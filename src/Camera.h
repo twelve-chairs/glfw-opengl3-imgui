@@ -13,7 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
-
+#include <spdlog/spdlog.h>
 #include "Shader.h"
 
 class Camera{
@@ -32,8 +32,8 @@ public:
     int height;
 
     // Adjust the speed of the camera and it's sensitivity when looking around
-    float speed = 1.000001f;
-    float sensitivity = 10.6f;
+    float speed = 0.00001f;
+    float sensitivity = 0.06f;
 
     // Camera constructor to set up initial values
     Camera(int width, int height, glm::vec3 position);
