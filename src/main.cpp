@@ -33,41 +33,38 @@ namespace fs = std::filesystem;
 #include "Camera.h"
 
 
-
 unsigned int width = 1300;
 unsigned int height = 900;
 const char* glsl_version;
 
 GLuint frameBufferObject;
 GLuint renderBufferObject;
-GLuint renderingProgram = 0;
-GLuint renderedTexture = 0;
 unsigned int textureColorBuffer;
 ImVec2 frameBufferSize;
 
 // Vertices coordinates
 GLfloat vertices[] =
-        { //     COORDINATES     /        COLORS          /    TexCoord   /        NORMALS       //
-                -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
-                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
-                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+        { //     COORDINATES        /        COLORS          /    TexCoord   /        NORMALS       //
+                -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    5.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    5.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
 
-                -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
-                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+                -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    2.5f, 5.0f,     -0.8f, 0.5f,  0.0f, // Left Side
 
-                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
-                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                -0.5f, 0.0f, -0.5f,    0.83f, 0.70f, 0.44f,	    5.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    2.5f, 5.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
 
-                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.8f, 0.5f,  0.0f, // Right side
+                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    5.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    2.5f, 5.0f,      0.8f, 0.5f,  0.0f, // Right side
 
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
-                -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.0f, 0.5f,  0.8f  // Facing side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    5.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+                -0.5f, 0.0f,  0.5f,    0.83f, 0.70f, 0.44f,     0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    2.5f, 5.0f,      0.0f, 0.5f,  0.8f  // Facing side
         };
 
 // Indices for vertices order
@@ -171,7 +168,6 @@ GLuint initFrameBuffer(){
         spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    renderedTexture = frameBufferObject;
     return frameBufferObject;
 }
 
@@ -350,6 +346,7 @@ int main()
         // Main while loop
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
+
             // Start the Dear ImGui frame
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -370,6 +367,9 @@ int main()
 
             try {
                 avail_size = ImGui::GetContentRegionAvail();
+//                camera.width = avail_size.x;
+//                camera.height = avail_size.y;
+//                spdlog::info("W: {}, H: {}", camera.width, camera. height);
                 window_position = ImGui::GetWindowPos();
                 if (frameBufferSize.x != avail_size.x || frameBufferSize.y != avail_size.y){
                     frameBufferSize.x = avail_size.x;

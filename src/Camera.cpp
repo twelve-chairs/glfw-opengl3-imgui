@@ -33,12 +33,7 @@ void Camera::Matrix(Shader& shader, const char* uniform)
 
 void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_size)
 {
-    // [2021-11-14 17:04:53.910] [info] avail_size: 1060x841
-    // [2021-11-14 17:04:53.910] [info] window_position: 147x153
-    // [2021-11-14 17:04:53.910] [info] screen_pos: 147x153
-
     ImVec4 window_size = ImVec4(window_position.x, window_position.y, window_position.x + avail_size.x, window_position.y + avail_size.y);
-    spdlog::info("{} x {}, {} x {}", window_position.x, window_position.y, window_position.x + avail_size.x, window_position.y + avail_size.y);
     // Handles key inputs
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
@@ -81,29 +76,26 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_siz
         double mouseY;
 
         float padding = 20.0f;
+        window_size.x += padding;
+        window_size.y += padding;
+        window_size.z -= padding;
+        window_size.w -= padding;
 
         glfwGetCursorPos(window, &mouseX, &mouseY);
-        if ((window_size.x + padding < mouseX && mouseX < window_size.z - padding) && (window_size.y + padding < mouseY && mouseY < window_size.w - padding)){
+        if ((window_size.x < mouseX && mouseX < window_size.z) && (window_size.y < mouseY && mouseY < window_size.w)){
             // Hides mouse cursor
-//        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
             // Prevents camera from jumping on the first click
             if (firstClick)
             {
-                float z = window_size.z / 2;
-                float w = window_size.w / 2;
-//            spdlog::info("Size: z{} x w{}", z, w);
-//            glfwSetCursorPos(window, (z / 2), (w / 2));
+                float z = (window_size.x + window_size.z) / 2;
+                float w = (window_size.y + window_size.w) / 2;
+                glfwSetCursorPos(window, z, w);
                 firstClick = false;
             }
 
             // Stores the coordinates of the cursor
-
-            float padding = 20.0f;
-            window_size.x += padding;
-            window_size.y -= padding;
-            window_size.z += padding;
-            window_size.w -= padding;
 
             // Fetches the coordinates of the cursor
 
@@ -126,12 +118,15 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_siz
         }
 
         // Sets mouse cursor to the middle of the screen so that it doesn't end up roaming around
-//        glfwSetCursorPos(window, (window_size.x / 2), (window_size.y / 2));
+//        float z = (window_size.x + window_size.z) / 2;
+//        float w = (window_size.y + window_size.w) / 2;
+//        glfwSetCursorPos(window, z, w);
+
     }
     else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
     {
         // Unhides cursor since camera is not looking around anymore
-//        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         // Makes sure the next time the camera looks around it doesn't jump
         firstClick = true;
     }

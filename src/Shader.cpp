@@ -34,7 +34,7 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     // Compile the Vertex Shader into machine code
     glCompileShader(vertexShader);
-    // Checks if Shader compiled succesfully
+    // Checks if Shader compiled successfully
     compileErrors(vertexShader, "VERTEX");
 
     // Create Fragment Shader Object and get its reference
@@ -43,7 +43,7 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
     // Compile the Vertex Shader into machine code
     glCompileShader(fragmentShader);
-    // Checks if Shader compiled succesfully
+    // Checks if Shader compiled successfully
     compileErrors(fragmentShader, "FRAGMENT");
 
     // Create Shader Program Object and get its reference
@@ -53,7 +53,7 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile)
     glAttachShader(ID, fragmentShader);
     // Wrap-up/Link all the shaders together into the Shader Program
     glLinkProgram(ID);
-    // Checks if Shaders linked succesfully
+    // Checks if Shaders linked successfully
     compileErrors(ID, "PROGRAM");
 
     // Delete the now useless Vertex and Fragment Shader objects
