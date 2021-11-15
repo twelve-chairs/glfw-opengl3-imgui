@@ -414,7 +414,7 @@ int main()
             // Camera window
             ImGui::SetNextWindowPos( ImVec2(0,70), ImGuiCond_Once);
             ImGui::SetNextWindowSize(ImVec2(220, 200), ImGuiCond_Always);
-            ImGui::Begin("Camera");
+            ImGui::Begin("OpenGL Window");
             ImGui::SliderFloat("X", &window_position.x, 0, width);
             ImGui::SliderFloat("Y", &window_position.y, 0, height);
             ImGui::SliderFloat("X1", &avail_size.x, 0, width);
