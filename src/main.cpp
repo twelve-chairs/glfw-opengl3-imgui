@@ -211,6 +211,9 @@ void display(auto &window, auto &camera, auto &window_position, auto &avail_size
     glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
+}
+
 int main()
 {
     ImVec2 window_position;
@@ -234,7 +237,10 @@ int main()
             spdlog::error("glfwCreateWindow");
             return 1;
         }
+
         glfwMakeContextCurrent(window);
+        glfwSetScrollCallback(window, scroll_callback);
+        glfwSetWindowSizeCallback(window, windowResizeCallback);
 
         if (glewInit() != GLEW_OK){
             spdlog::error("glewInit");
@@ -319,6 +325,7 @@ int main()
         Camera camera(avail_size.x, avail_size.y, glm::vec3(0.0f, 0.0f, 2.0f));
 
         frameBufferSize = ImVec2(avail_size.x, avail_size.y);
+
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -338,7 +345,6 @@ int main()
         bool show_another_window = false;
         auto mainBackgroundColor = ImVec4(0.32f, 0.46f, 0.58f, 1.00f);
 
-        glfwSetWindowSizeCallback(window, windowResizeCallback);
         initFrameBuffer();
 
         // Main while loop

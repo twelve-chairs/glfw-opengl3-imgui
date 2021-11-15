@@ -31,7 +31,6 @@ void Camera::Matrix(Shader& shader, const char* uniform)
 }
 
 
-
 void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_size)
 {
     // [2021-11-14 17:04:53.910] [info] avail_size: 1060x841
@@ -39,7 +38,7 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_siz
     // [2021-11-14 17:04:53.910] [info] screen_pos: 147x153
 
     ImVec4 window_size = ImVec4(window_position.x, window_position.y, window_position.x + avail_size.x, window_position.y + avail_size.y);
-//    spdlog::info("{} x {}, {} x {}", window_position.x, window_position.y, window_position.x + avail_size.x, window_position.y + avail_size.y);
+    spdlog::info("{} x {}, {} x {}", window_position.x, window_position.y, window_position.x + avail_size.x, window_position.y + avail_size.y);
     // Handles key inputs
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
@@ -81,8 +80,10 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_siz
         double mouseX;
         double mouseY;
 
+        float padding = 20.0f;
+
         glfwGetCursorPos(window, &mouseX, &mouseY);
-        if ((window_size.x < mouseX && mouseX < window_size.z) || (window_size.y > mouseY && mouseY > window_size.w)){
+        if ((window_size.x + padding < mouseX && mouseX < window_size.z - padding) && (window_size.y + padding < mouseY && mouseY < window_size.w - padding)){
             // Hides mouse cursor
 //        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
