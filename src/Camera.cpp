@@ -9,13 +9,6 @@ Camera::Camera(int width, int height, glm::vec3 position)
     Position = position;
 }
 
-void Camera::reset(){
-
-    Camera::width = width;
-    Camera::height = height;
-//    Position = position;
-}
-
 void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
 {
     // Initializes matrices since otherwise they will be the null matrix
