@@ -217,6 +217,7 @@ void display(auto &window, auto &camera, auto &window_position, auto &avail_size
 int main()
 {
     ImVec2 window_position;
+    // OpenGL window default size
     ImVec2 avail_size = ImVec2(1060, 860);
 
     try {
@@ -338,7 +339,7 @@ int main()
         // Our state
         bool show_demo_window = false;
         bool show_another_window = false;
-        auto mainBackgroundColor = ImVec4(0.32f, 0.56f, 0.86f, 1.00f);
+        auto mainBackgroundColor = ImVec4(0.32f, 0.46f, 0.58f, 1.00f);
 
         glfwSetWindowSizeCallback(window, windowResizeCallback);
         initFrameBuffer();
@@ -409,7 +410,7 @@ int main()
             double mouseY;
             // Fetches the coordinates of the cursor
             glfwGetCursorPos(window, &mouseX, &mouseY);
-            ImGui::Text("Mouse coordindates: ", mouseX, mouseY);
+            ImGui::Text(" %.1f x %.1f", mouseX, mouseY);
             ImGui::End();
 
             // Camera window
@@ -429,8 +430,8 @@ int main()
 //            int display_h;
 //            glfwGetFramebufferSize(window, &display_w, &display_h);
 //            glViewport(0, 0, display_w, display_h);
-//            glClearColor(mainBackgroundColor.x, mainBackgroundColor.y, mainBackgroundColor.z, 1);
-//            glClear(GL_COLOR_BUFFER_BIT);
+            glClearColor(mainBackgroundColor.x, mainBackgroundColor.y, mainBackgroundColor.z, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             glfwSwapBuffers(window);
