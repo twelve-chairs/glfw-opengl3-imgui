@@ -201,8 +201,6 @@ void display(auto &window, auto &camera, auto &window_position, auto &avail_size
     // Draw primitives, number of indices, datatype of indices, index of indices
     glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
 
-
-
     // Tells OpenGL which Shader Program we want to use
     lightShader.Activate();
     // Export the camMatrix to the Vertex Shader of the light cube
