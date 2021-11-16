@@ -36,7 +36,7 @@ namespace fs = std::filesystem;
 unsigned int width = 1300;
 unsigned int height = 900;
 const char* glsl_version;
-const int FPS = 50.0f;
+const int FPS = 60.0f;
 
 GLuint frameBufferObject;
 GLuint renderBufferObject;
@@ -208,8 +208,7 @@ void display(auto &window, auto &camera, auto &window_position, auto &avail_size
     glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
-}
+
 
 int main()
 {
@@ -236,7 +235,7 @@ int main()
         }
 
         glfwMakeContextCurrent(window);
-        glfwSetScrollCallback(window, scroll_callback);
+
         glfwSetWindowSizeCallback(window, windowResizeCallback);
 
         if (glewInit() != GLEW_OK){
@@ -320,6 +319,7 @@ int main()
         glEnable(GL_DEPTH_TEST);
         // Creates camera object
         Camera camera(avail_size.x, avail_size.y, glm::vec3(0.0f, 0.0f, 2.0f));
+//        glfwSetScrollCallback(window, camera.scrollCallback());
 
         frameBufferSize = ImVec2(avail_size.x, avail_size.y);
 
@@ -436,9 +436,8 @@ int main()
 
             glfwSwapBuffers(window);
 
-            // Limit to n FPS
+            // Limit to FPS frames per second
             while (glfwGetTime() < lastTime + 1.0 / FPS) {
-                pthread_yield_np();
             }
             lastTime += 1.0 / FPS;
         }

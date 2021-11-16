@@ -46,5 +46,6 @@ public:
     void Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_size);
 
     void reset();
+    void scrollCallback();
 };
 #endif
