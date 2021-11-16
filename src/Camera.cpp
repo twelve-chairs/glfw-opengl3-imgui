@@ -87,13 +87,14 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_siz
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
             // Prevents camera from jumping on the first click
+            float z = (window_size.x + window_size.z) / 2;
+            float w = (window_size.y + window_size.w) / 2;
             if (firstClick)
             {
-                float z = (window_size.x + window_size.z) / 2;
-                float w = (window_size.y + window_size.w) / 2;
-                glfwSetCursorPos(window, z, w);
+//                glfwSetCursorPos(window, z, w);
                 firstClick = false;
             }
+
 
             // Stores the coordinates of the cursor
 
@@ -101,13 +102,13 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_siz
 
             // Normalizes and shifts the coordinates of the cursor such that they begin in the middle of the screen
             // and then "transforms" them into degrees
-            float rotX = sensitivity * (float)(mouseY - (window_size.w / 2)) / window_size.w;
-            float rotY = sensitivity * (float)(mouseX - (window_size.z / 2)) / window_size.z;
+            float rotX = sensitivity * (float)(mouseY - (window_size.z / 2)) / window_size.z;
+            float rotY = sensitivity * (float)(mouseX - (window_size.w / 2)) / window_size.w;
 
             // Calculates upcoming vertical change in the Orientation
             glm::vec3 newOrientation = glm::rotate(Orientation, glm::radians(-rotX), glm::normalize(glm::cross(Orientation, Up)));
 
-            // Decides whether or not the next vertical Orientation is legal or not
+            // Decides whether the next vertical Orientation is legal or not
             if (abs(glm::angle(newOrientation, Up) - glm::radians(90.0f)) <= glm::radians(85.0f))
             {
                 Orientation = newOrientation;

@@ -32,6 +32,7 @@ conan_cmake_configure(REQUIRES cmake/3.21.3
         glm/0.9.9.8
         tinyobjloader/1.0.6
         stb/cci.20210713
+        libmikmod/3.3.11.1
         spdlog/1.9.2
         GENERATORS cmake cmake_paths cmake_find_package)
 conan_cmake_autodetect(settings)

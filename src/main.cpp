@@ -36,6 +36,7 @@ namespace fs = std::filesystem;
 unsigned int width = 1300;
 unsigned int height = 900;
 const char* glsl_version;
+const int FPS = 50.0f;
 
 GLuint frameBufferObject;
 GLuint renderBufferObject;
@@ -114,8 +115,8 @@ static void glfwErrorCallback(int error, const char* description)
 static void windowResizeCallback(GLFWwindow* window, int newWidth, int newHeight){
     glfwGetFramebufferSize(window, &newWidth, &newHeight);
     float newAspect = (float)newWidth / (float)newHeight;
-    width = newWidth;
-    height = newHeight;
+//    width = newWidth;
+//    height = newHeight;
 //    perspectiveMatrix = glm::perspective(1.0472f, newAspect, 0.1f, 1000.0f);
 }
 
@@ -342,6 +343,7 @@ int main()
         auto mainBackgroundColor = ImVec4(0.32f, 0.46f, 0.58f, 1.00f);
 
         initFrameBuffer();
+        double lastTime = glfwGetTime();
 
         // Main while loop
         while (!glfwWindowShouldClose(window)) {
@@ -433,6 +435,12 @@ int main()
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             glfwSwapBuffers(window);
+
+            // Limit to n FPS
+            while (glfwGetTime() < lastTime + 1.0 / FPS) {
+                pthread_yield_np();
+            }
+            lastTime += 1.0 / FPS;
         }
 
 
