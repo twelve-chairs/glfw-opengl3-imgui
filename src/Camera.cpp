@@ -24,12 +24,21 @@ void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
     cameraMatrix = projection * view;
 }
 
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
+    spdlog::info(yoffset);
+}
+
+
 void Camera::Matrix(Shader& shader, const char* uniform)
 {
     // Exports camera matrix
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 }
 
+void Camera::scrollCallback(){
+
+}
 
 void Camera::Inputs(GLFWwindow* window, ImVec2 glWindowPosition, ImVec2 glWindowSize)
 {
