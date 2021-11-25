@@ -168,19 +168,19 @@ typedef GLboolean (APIENTRYP PFNGLISENABLEDPROC) (GLenum cap);
 typedef void (APIENTRYP PFNGLVIEWPORTPROC) (GLint x, GLint y, GLsizei width, GLsizei height);
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void APIENTRY glPolygonMode (GLenum face, GLenum mode);
-GLAPI void APIENTRY glScissor (GLint x, GLint y, GLsizei width, GLsizei height);
+GLAPI void APIENTRY glScissor (GLint x, GLint y, GLsizei mainWindowWidth, GLsizei mainWindowHeight);
 GLAPI void APIENTRY glTexParameteri (GLenum target, GLenum pname, GLint param);
-GLAPI void APIENTRY glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels);
+GLAPI void APIENTRY glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei mainWindowWidth, GLsizei mainWindowHeight, GLint border, GLenum format, GLenum type, const void *pixels);
 GLAPI void APIENTRY glClear (GLbitfield mask);
 GLAPI void APIENTRY glClearColor (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
 GLAPI void APIENTRY glDisable (GLenum cap);
 GLAPI void APIENTRY glEnable (GLenum cap);
 GLAPI void APIENTRY glPixelStorei (GLenum pname, GLint param);
-GLAPI void APIENTRY glReadPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels);
+GLAPI void APIENTRY glReadPixels (GLint x, GLint y, GLsizei mainWindowWidth, GLsizei mainWindowHeight, GLenum format, GLenum type, void *pixels);
 GLAPI void APIENTRY glGetIntegerv (GLenum pname, GLint *data);
 GLAPI const GLubyte *APIENTRY glGetString (GLenum name);
 GLAPI GLboolean APIENTRY glIsEnabled (GLenum cap);
-GLAPI void APIENTRY glViewport (GLint x, GLint y, GLsizei width, GLsizei height);
+GLAPI void APIENTRY glViewport (GLint x, GLint y, GLsizei mainWindowWidth, GLsizei mainWindowHeight);
 #endif
 #endif /* GL_VERSION_1_0 */
 #ifndef GL_VERSION_1_1

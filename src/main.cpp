@@ -23,6 +23,8 @@ namespace fs = std::filesystem;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <unistd.h>
+#include <mikmod.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "Texture.h"
@@ -32,16 +34,22 @@ namespace fs = std::filesystem;
 #include "EBO.h"
 #include "Camera.h"
 
-
-unsigned int width = 1300;
-unsigned int height = 900;
+const int FPS = 60.0f;
 const char* glsl_version;
-const int FPS = 50.0f;
+unsigned int mainWindowWidth = 1300;
+unsigned int mainWindowHeight = 900;
 
 GLuint frameBufferObject;
 GLuint renderBufferObject;
 unsigned int textureColorBuffer;
-ImVec2 frameBufferSize;
+
+// OpenGL window default size and position
+ImVec2 glWindowSize = ImVec2(1060, 860);
+ImVec2 frameBufferSize = ImVec2(glWindowSize.x, glWindowSize.y);
+ImVec2 glWindowPosition;
+ImVec4 glWindowCoordinates;
+
+
 
 // Vertices coordinates
 GLfloat vertices[] =
@@ -113,11 +121,19 @@ static void glfwErrorCallback(int error, const char* description)
 }
 
 static void windowResizeCallback(GLFWwindow* window, int newWidth, int newHeight){
-    glfwGetFramebufferSize(window, &newWidth, &newHeight);
-    float newAspect = (float)newWidth / (float)newHeight;
-//    width = newWidth;
-//    height = newHeight;
+//
+//    glfwGetFramebufferSize(window, &newWidth, &newHeight);
+//    float newAspect = (float)newWidth / (float)newHeight;
+//    mainWindowWidth = newWidth;
+//    mainWindowHeight = newHeight;
 //    perspectiveMatrix = glm::perspective(1.0472f, newAspect, 0.1f, 1000.0f);
+//    glViewport(0, 0, newWidth, newHeight);
+    spdlog::info("window resized");
+}
+
+static void windowMoveCallback(GLFWwindow* window, int newWidth, int newHeight){
+//    glViewport(0, 0, newWidth, newHeight);
+    spdlog::info("window moved");
 }
 
 void glslSetup(){
@@ -187,8 +203,7 @@ void display(auto &window, auto &camera, auto &window_position, auto &avail_size
     // Tells OpenGL which Shader Program we want to use
     shaderProgram.Activate();
     // Exports the camera Position to the Fragment Shader for specular lighting
-    glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y,
-                camera.Position.z);
+    glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
     // Export the camMatrix to the Vertex Shader of the pyramid
     camera.Matrix(shaderProgram, "camMatrix");
     // Binds texture so that is appears in rendering
@@ -213,9 +228,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
 
 int main()
 {
-    ImVec2 window_position;
-    // OpenGL window default size
-    ImVec2 avail_size = ImVec2(1060, 860);
+
 
     try {
         // Initialize GLFW
@@ -229,7 +242,7 @@ int main()
         glslSetup();
 
         // Create window with graphics context
-        GLFWwindow* window = glfwCreateWindow(1300, 900, "glfw-opengl3-imgui", nullptr, nullptr);
+        GLFWwindow* window = glfwCreateWindow(mainWindowWidth, mainWindowHeight, "glfw-opengl3-imgui", nullptr, nullptr);
         if (window == nullptr) {
             spdlog::error("glfwCreateWindow");
             return 1;
@@ -238,6 +251,7 @@ int main()
         glfwMakeContextCurrent(window);
         glfwSetScrollCallback(window, scroll_callback);
         glfwSetWindowSizeCallback(window, windowResizeCallback);
+        glfwSetWindowPosCallback(window, windowMoveCallback);
 
         if (glewInit() != GLEW_OK){
             spdlog::error("glewInit");
@@ -255,7 +269,7 @@ int main()
         }
         // Specify the viewport of OpenGL in the Window
         // In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
-        glViewport(0, 0, avail_size.x, avail_size.y);
+        glViewport(0, 0, glWindowSize.x, glWindowSize.y);
 
         // Generates Shader object using shaders default.vert and default.frag
         Shader shaderProgram("../src/include/default.vert", "../src/include/default.frag");
@@ -304,24 +318,22 @@ int main()
 
         lightShader.Activate();
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
-        glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z,
-                    lightColor.w);
+        glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
         shaderProgram.Activate();
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(pyramidModel));
-        glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z,
-                    lightColor.w);
+        glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
         // Texture
-        Texture brickTex("../src/include/guybrush.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-        brickTex.texUnit(shaderProgram, "tex0", 0);
+        Texture guybrush("../src/include/guybrush.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+        guybrush.texUnit(shaderProgram, "tex0", 0);
 
         // Enables the Depth Buffer
         glEnable(GL_DEPTH_TEST);
         // Creates camera object
-        Camera camera(avail_size.x, avail_size.y, glm::vec3(0.0f, 0.0f, 2.0f));
+        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(0.0f, 0.0f, 2.0f));
 
-        frameBufferSize = ImVec2(avail_size.x, avail_size.y);
+//        frameBufferSize = ImVec2(glWindowSize.x, glWindowSize.y);
 
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -338,8 +350,7 @@ int main()
         ImGui_ImplOpenGL3_Init(glsl_version);
 
         // Our state
-        bool show_demo_window = false;
-        bool show_another_window = false;
+        bool show_demo_window = true;
         auto mainBackgroundColor = ImVec4(0.32f, 0.46f, 0.58f, 1.00f);
 
         initFrameBuffer();
@@ -361,37 +372,33 @@ int main()
 
             // OpenGL window
             ImGui::SetNextWindowPos( ImVec2(220,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(avail_size.x, avail_size.y), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(glWindowSize.x, glWindowSize.y), ImGuiCond_Once);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             ImGui::PopStyleVar();
             ImGui::BeginChild("Render");
+            glWindowSize = ImGui::GetContentRegionAvail();
+            glWindowPosition = ImGui::GetWindowPos();
+            frameBufferSize.x = glWindowSize.x;
+            frameBufferSize.y = glWindowSize.y;
 
             try {
-                avail_size = ImGui::GetContentRegionAvail();
-//                camera.width = avail_size.x;
-//                camera.height = avail_size.y;
-//                spdlog::info("W: {}, H: {}", camera.width, camera. height);
-                window_position = ImGui::GetWindowPos();
-                if (frameBufferSize.x != avail_size.x || frameBufferSize.y != avail_size.y){
-                    frameBufferSize.x = avail_size.x;
-                    frameBufferSize.y = avail_size.y;
-                    glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameBufferSize.x, frameBufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    glBindTexture(GL_TEXTURE_2D, 0);
+                glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameBufferSize.x, frameBufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glBindTexture(GL_TEXTURE_2D, 0);
 
-                    glBindRenderbuffer(GL_RENDERBUFFER, renderBufferObject);
-                    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameBufferSize.x, frameBufferSize.y);
-                    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferObject);
-                }
+                glBindRenderbuffer(GL_RENDERBUFFER, renderBufferObject);
+                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, frameBufferSize.x, frameBufferSize.y);
+                glBindRenderbuffer(GL_RENDERBUFFER, 0);
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBufferObject);
+
                 glClearColor( 0.0f , 0.0f , 0.0f , 1.0f );
                 glClear(GL_FRAMEBUFFER);
                 glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
 
-                display(window, camera, window_position, avail_size, shaderProgram, brickTex, VAO1, lightShader, lightVAO);
+                display(window, camera, glWindowPosition, glWindowSize, shaderProgram, guybrush, VAO1, lightShader, lightVAO);
 
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 // TODO: Hard-coded texture ID
@@ -419,12 +426,25 @@ int main()
 
             // Camera window
             ImGui::SetNextWindowPos( ImVec2(0,70), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 200), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(220, 500), ImGuiCond_Always);
             ImGui::Begin("OpenGL Window");
-            ImGui::SliderFloat("X", &window_position.x, 0, width);
-            ImGui::SliderFloat("Y", &window_position.y, 0, height);
-            ImGui::SliderFloat("X1", &avail_size.x, 0, width);
-            ImGui::SliderFloat("Y1", &avail_size.y, 0, height);
+            ImGui::SliderFloat("glWindowPosition.x", &glWindowPosition.x, 0, mainWindowWidth);
+            ImGui::SliderFloat("glWindowPosition.y", &glWindowPosition.y, 0, mainWindowHeight);
+            ImGui::SliderFloat("glWindowSize.x", &glWindowSize.x, 0, mainWindowWidth);
+            ImGui::SliderFloat("glWindowSize.y", &glWindowSize.y, 0, mainWindowHeight);
+            ImGui::SliderFloat("frameBufferSize.x", &frameBufferSize.x, 0, mainWindowHeight);
+            ImGui::SliderFloat("frameBufferSize.y", &frameBufferSize.y, 0, mainWindowHeight);
+            ImGui::SliderInt("camera.width", &camera.width, 0, mainWindowHeight);
+            ImGui::SliderInt("camera.height", &camera.height, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Orientation.x", &camera.Orientation.x, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Orientation.y", &camera.Orientation.y, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Orientation.z", &camera.Orientation.z, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Position.x", &camera.Position.x, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Position.y", &camera.Position.y, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Position.z", &camera.Position.z, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Up.x", &camera.Up.x, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Up.y", &camera.Up.y, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Up.z", &camera.Up.z, 0, mainWindowHeight);
             ImGui::End();
 
             // Rendering
@@ -449,7 +469,7 @@ int main()
         VAO1.Delete();
         VBO1.Delete();
         EBO1.Delete();
-        brickTex.Delete();
+        guybrush.Delete();
         shaderProgram.Delete();
         lightVAO.Delete();
         lightVBO.Delete();

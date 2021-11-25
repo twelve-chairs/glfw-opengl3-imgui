@@ -27,7 +27,7 @@ public:
     // Prevents the camera from jumping around when first clicking left click
     bool firstClick = true;
 
-    // Stores the width and height of the window
+    // Stores the mainWindowWidth and mainWindowHeight of the window
     int width;
     int height;
 
@@ -43,7 +43,7 @@ public:
     // Exports the camera matrix to a shader
     void Matrix(Shader& shader, const char* uniform);
     // Handles camera inputs
-    void Inputs(GLFWwindow* window, ImVec2 window_position, ImVec2 avail_size);
+    void Inputs(GLFWwindow* window, ImVec2 glWindowPosition, ImVec2 glWindowSize);
 
     void reset();
 };

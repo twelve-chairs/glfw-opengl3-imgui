@@ -48,6 +48,7 @@ find_package(imgui REQUIRED)
 find_package(glm REQUIRED)
 find_package(tinyobjloader REQUIRED)
 find_package(stb REQUIRED)
+find_package(libmikmod REQUIRED)
 find_package(spdlog REQUIRED)
 
 file(GLOB H_FILES "src/*.h")
@@ -63,4 +64,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         glm::glm
         tinyobjloader::tinyobjloader
         stb::stb
+        libmikmod::libmikmod
         spdlog::spdlog)

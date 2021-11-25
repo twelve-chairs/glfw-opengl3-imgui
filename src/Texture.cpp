@@ -5,7 +5,7 @@ Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum format, 
     // Assigns the type of the texture ot the texture object
     type = texType;
 
-    // Stores the width, height, and the number of color channels of the image
+    // Stores the mainWindowWidth, mainWindowHeight, and the number of color channels of the image
     int widthImg, heightImg, numColCh;
     // Flips the image so it appears right side up
     stbi_set_flip_vertically_on_load(true);
