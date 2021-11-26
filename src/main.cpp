@@ -44,7 +44,7 @@ GLuint renderBufferObject;
 unsigned int textureColorBuffer;
 
 // OpenGL window default size and position
-ImVec2 glWindowSize = ImVec2(1060, 860);
+ImVec2 glWindowSize = ImVec2(600, 400);
 ImVec2 frameBufferSize = ImVec2(glWindowSize.x, glWindowSize.y);
 ImVec2 glWindowPosition;
 ImVec4 glWindowCoordinates;
@@ -188,14 +188,16 @@ GLuint initFrameBuffer(){
     return frameBufferObject;
 }
 
-void display(auto &window, auto &camera, auto &window_position, auto &avail_size, auto &shaderProgram, auto &brickTex, auto &VAO1, auto &lightShader, auto &lightVAO){
+void display(auto &window, auto &camera, auto &shaderProgram, auto &brickTex, auto &VAO1, auto &lightShader, auto &lightVAO, bool isWindowFocused){
     // Specify the color of the background
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     // Clean the back buffer and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Handles camera inputs
-    camera.Inputs(window, window_position, avail_size);
+    if (isWindowFocused) {
+        camera.Inputs(window, glWindowPosition, glWindowSize);
+    }
     // Updates and exports the camera matrix to the Vertex Shader
     camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
@@ -223,13 +225,9 @@ void display(auto &window, auto &camera, auto &window_position, auto &avail_size
     glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
-}
 
 int main()
 {
-
-
     try {
         // Initialize GLFW
         // Setup window
@@ -249,7 +247,7 @@ int main()
         }
 
         glfwMakeContextCurrent(window);
-        glfwSetScrollCallback(window, scroll_callback);
+//        glfwSetScrollCallback(window, scroll_callback);
         glfwSetWindowSizeCallback(window, windowResizeCallback);
         glfwSetWindowPosCallback(window, windowMoveCallback);
 
@@ -267,9 +265,6 @@ int main()
             spdlog::error("glewInit");
             return 0;
         }
-        // Specify the viewport of OpenGL in the Window
-        // In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
-        glViewport(0, 0, glWindowSize.x, glWindowSize.y);
 
         // Generates Shader object using shaders default.vert and default.frag
         Shader shaderProgram("../src/include/default.vert", "../src/include/default.frag");
@@ -331,8 +326,10 @@ int main()
         // Enables the Depth Buffer
         glEnable(GL_DEPTH_TEST);
         // Creates camera object
-        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(0.0f, 0.0f, 2.0f));
-
+        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(-3.566f, -1.627f, 9.091f));
+        camera.Orientation.x = 0.639f;
+        camera.Orientation.y = 0.485f;
+        camera.Orientation.z = -0.597f;
 //        frameBufferSize = ImVec2(glWindowSize.x, glWindowSize.y);
 
         // Setup Dear ImGui context
@@ -365,11 +362,6 @@ int main()
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-            if (show_demo_window) {
-                ImGui::ShowDemoWindow(&show_demo_window);
-            }
-
             // OpenGL window
             ImGui::SetNextWindowPos( ImVec2(220,0), ImGuiCond_Once);
             ImGui::SetNextWindowSize(ImVec2(glWindowSize.x, glWindowSize.y), ImGuiCond_Once);
@@ -381,7 +373,9 @@ int main()
             glWindowPosition = ImGui::GetWindowPos();
             frameBufferSize.x = glWindowSize.x;
             frameBufferSize.y = glWindowSize.y;
-
+            // Specify the viewport of OpenGL in the Window
+            // In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
+//            glViewport(0, 0, glWindowSize.x, glWindowSize.y);
             try {
                 glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameBufferSize.x, frameBufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -398,7 +392,7 @@ int main()
                 glClear(GL_FRAMEBUFFER);
                 glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
 
-                display(window, camera, glWindowPosition, glWindowSize, shaderProgram, guybrush, VAO1, lightShader, lightVAO);
+                display(window, camera, shaderProgram, guybrush, VAO1, lightShader, lightVAO, ImGui::IsWindowFocused());
 
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 // TODO: Hard-coded texture ID
@@ -447,12 +441,17 @@ int main()
             ImGui::SliderFloat("camera.Up.z", &camera.Up.z, 0, mainWindowHeight);
             ImGui::End();
 
+            // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+            if (show_demo_window) {
+                ImGui::ShowDemoWindow(&show_demo_window);
+            }
+
             // Rendering
             ImGui::Render();
-
             glClearColor(mainBackgroundColor.x, mainBackgroundColor.y, mainBackgroundColor.z, 1);
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//            glViewport(0, 0, glWindowSize.x, glWindowSize.y);
 
             glfwSwapBuffers(window);
 
