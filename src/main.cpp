@@ -183,7 +183,7 @@ GLuint initFrameBuffer(){
 
 void display(auto &window, auto &camera, auto &shaderProgram, auto &brickTex, auto &VAO1, auto &lightShader, auto &lightVAO, bool isWindowFocused){
     // Specify the color of the background
-    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+    glClearColor(0.06f, 0.06f, 0.06f, 0.3f);
     // Clean the back buffer and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -318,7 +318,7 @@ int main(){
         // Enables the Depth Buffer
         glEnable(GL_DEPTH_TEST);
         // Creates camera object
-        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(-2.140f, -0.737f, 5.649f));
+        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(-2.140f, 0.0, 5.649f));
         camera.Orientation.x = 0.650f;
         camera.Orientation.y = 0.493f;
         camera.Orientation.z = -0.596f;
@@ -331,7 +331,7 @@ int main(){
         io.ConfigWindowsMoveFromTitleBarOnly = true;
 
         // Setup Dear ImGui style
-        ImGui::StyleColorsLight();
+        ImGui::StyleColorsDark();
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -339,7 +339,7 @@ int main(){
 
         // Our state
         bool show_demo_window = true;
-        auto mainBackgroundColor = ImVec4(0.32f, 0.46f, 0.58f, 1.00f);
+        auto mainBackgroundColor = ImVec4(0.01f, 0.01f, 0.01f, 1.00f);
 
         initFrameBuffer();
         double lastTime = glfwGetTime();
@@ -355,7 +355,7 @@ int main(){
 
             // Stats window
             ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(460, 70), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(350, 70), ImGuiCond_Always);
             ImGui::Begin("Stats");
             ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             // Stores the coordinates of the cursor
@@ -373,25 +373,19 @@ int main(){
 
             // Camera window
             ImGui::SetNextWindowPos( ImVec2(0,70), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(460, 430), ImGuiCond_Always);
-            ImGui::Begin("OpenGL Window");
-            ImGui::SliderFloat("glWindowPosition.x", &glWindowPosition.x, 0, mainWindowWidth);
-            ImGui::SliderFloat("glWindowPosition.y", &glWindowPosition.y, 0, mainWindowHeight);
-            ImGui::SliderFloat("glWindowSize.x", &glWindowSize.x, 0, mainWindowWidth);
-            ImGui::SliderFloat("glWindowSize.y", &glWindowSize.y, 0, mainWindowHeight);
-            ImGui::SliderFloat("frameBufferSize.x", &frameBufferSize.x, 0, mainWindowHeight);
-            ImGui::SliderFloat("frameBufferSize.y", &frameBufferSize.y, 0, mainWindowHeight);
-            ImGui::SliderInt("camera.width", &camera.width, 0, mainWindowHeight);
-            ImGui::SliderInt("camera.height", &camera.height, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Orientation.x", &camera.Orientation.x, -10, 10);
-            ImGui::SliderFloat("camera.Orientation.y", &camera.Orientation.y, -10, 10);
-            ImGui::SliderFloat("camera.Orientation.z", &camera.Orientation.z, -10, 10);
-            ImGui::SliderFloat("camera.Position.x", &camera.Position.x, -10, 10);
-            ImGui::SliderFloat("camera.Position.y", &camera.Position.y, -10, 10);
-            ImGui::SliderFloat("camera.Position.z", &camera.Position.z, -10, 10);
-            ImGui::SliderFloat("camera.Up.x", &camera.Up.x, -10, 10);
-            ImGui::SliderFloat("camera.Up.y", &camera.Up.y, -10, 10);
-            ImGui::SliderFloat("camera.Up.z", &camera.Up.z, -10, 10);
+            ImGui::SetNextWindowSize(ImVec2(350, 300), ImGuiCond_Always);
+            ImGui::Begin("Camera");
+            ImGui::SliderInt("Width", &camera.width, 0, mainWindowHeight);
+            ImGui::SliderInt("Height", &camera.height, 0, mainWindowHeight);
+            ImGui::SliderFloat("Orientation - X", &camera.Orientation.x, -10, 10);
+            ImGui::SliderFloat("Orientation - Y", &camera.Orientation.y, -10, 10);
+            ImGui::SliderFloat("Orientation - Z", &camera.Orientation.z, -10, 10);
+            ImGui::SliderFloat("Position - X", &camera.Position.x, -10, 10);
+            ImGui::SliderFloat("Position - Y", &camera.Position.y, 0, 10);
+            ImGui::SliderFloat("Position - Z", &camera.Position.z, -10, 10);
+            ImGui::SliderFloat("Up - X", &camera.Up.x, -10, 10);
+            ImGui::SliderFloat("Up - Y", &camera.Up.y, -10, 10);
+            ImGui::SliderFloat("Up - Z", &camera.Up.z, -10, 10);
             ImGui::End();
 
             // OpenGL window

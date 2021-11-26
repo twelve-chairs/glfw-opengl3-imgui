@@ -42,6 +42,9 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 glWindowPosition, ImVec2 glWindow
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
         Position += speed * Orientation;
+        if (Position.y < 0){
+            Position.y = 0;
+        }
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
@@ -50,6 +53,9 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 glWindowPosition, ImVec2 glWindow
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
         Position += speed * -Orientation;
+        if (Position.y < 0){
+            Position.y = 0;
+        }
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
