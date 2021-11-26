@@ -37,7 +37,7 @@ namespace fs = std::filesystem;
 const int FPS = 60.0f;
 const char* glsl_version;
 unsigned int mainWindowWidth = 1300;
-unsigned int mainWindowHeight = 900;
+unsigned int mainWindowHeight = 860;
 
 GLuint frameBufferObject;
 GLuint renderBufferObject;
@@ -320,16 +320,16 @@ int main()
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
         // Texture
-        Texture guybrush("../src/include/guybrush.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+        Texture guybrush("../src/include/preconcrete_wall_001_long_diff.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
         guybrush.texUnit(shaderProgram, "tex0", 0);
 
         // Enables the Depth Buffer
         glEnable(GL_DEPTH_TEST);
         // Creates camera object
-        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(-3.566f, -1.627f, 9.091f));
-        camera.Orientation.x = 0.639f;
-        camera.Orientation.y = 0.485f;
-        camera.Orientation.z = -0.597f;
+        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(-2.140f, -0.737f, 5.649f));
+        camera.Orientation.x = 0.650f;
+        camera.Orientation.y = 0.493f;
+        camera.Orientation.z = -0.596f;
 //        frameBufferSize = ImVec2(glWindowSize.x, glWindowSize.y);
 
         // Setup Dear ImGui context
@@ -362,8 +362,49 @@ int main()
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+            // Stats window
+            ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(460, 70), ImGuiCond_Always);
+            ImGui::Begin("Stats");
+            ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            // Stores the coordinates of the cursor
+            double mouseX;
+            double mouseY;
+            // Fetches the coordinates of the cursor
+            glfwGetCursorPos(window, &mouseX, &mouseY);
+            ImGui::Text(" %.1f x %.1f", mouseX, mouseY);
+            ImGui::End();
+
+            // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+            if (show_demo_window) {
+                ImGui::ShowDemoWindow(&show_demo_window);
+            }
+
+            // Camera window
+            ImGui::SetNextWindowPos( ImVec2(0,70), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(460, 430), ImGuiCond_Always);
+            ImGui::Begin("OpenGL Window");
+            ImGui::SliderFloat("glWindowPosition.x", &glWindowPosition.x, 0, mainWindowWidth);
+            ImGui::SliderFloat("glWindowPosition.y", &glWindowPosition.y, 0, mainWindowHeight);
+            ImGui::SliderFloat("glWindowSize.x", &glWindowSize.x, 0, mainWindowWidth);
+            ImGui::SliderFloat("glWindowSize.y", &glWindowSize.y, 0, mainWindowHeight);
+            ImGui::SliderFloat("frameBufferSize.x", &frameBufferSize.x, 0, mainWindowHeight);
+            ImGui::SliderFloat("frameBufferSize.y", &frameBufferSize.y, 0, mainWindowHeight);
+            ImGui::SliderInt("camera.width", &camera.width, 0, mainWindowHeight);
+            ImGui::SliderInt("camera.height", &camera.height, 0, mainWindowHeight);
+            ImGui::SliderFloat("camera.Orientation.x", &camera.Orientation.x, -10, 10);
+            ImGui::SliderFloat("camera.Orientation.y", &camera.Orientation.y, -10, 10);
+            ImGui::SliderFloat("camera.Orientation.z", &camera.Orientation.z, -10, 10);
+            ImGui::SliderFloat("camera.Position.x", &camera.Position.x, -10, 10);
+            ImGui::SliderFloat("camera.Position.y", &camera.Position.y, -10, 10);
+            ImGui::SliderFloat("camera.Position.z", &camera.Position.z, -10, 10);
+            ImGui::SliderFloat("camera.Up.x", &camera.Up.x, -10, 10);
+            ImGui::SliderFloat("camera.Up.y", &camera.Up.y, -10, 10);
+            ImGui::SliderFloat("camera.Up.z", &camera.Up.z, -10, 10);
+            ImGui::End();
+
             // OpenGL window
-            ImGui::SetNextWindowPos( ImVec2(220,0), ImGuiCond_Once);
+            ImGui::SetNextWindowPos( ImVec2(460,100), ImGuiCond_Once);
             ImGui::SetNextWindowSize(ImVec2(glWindowSize.x, glWindowSize.y), ImGuiCond_Once);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
@@ -404,47 +445,6 @@ int main()
 
             ImGui::EndChild();
             ImGui::End();
-
-            // Stats window
-            ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 70), ImGuiCond_Always);
-            ImGui::Begin("Stats");
-            ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            // Stores the coordinates of the cursor
-            double mouseX;
-            double mouseY;
-            // Fetches the coordinates of the cursor
-            glfwGetCursorPos(window, &mouseX, &mouseY);
-            ImGui::Text(" %.1f x %.1f", mouseX, mouseY);
-            ImGui::End();
-
-            // Camera window
-            ImGui::SetNextWindowPos( ImVec2(0,70), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(220, 500), ImGuiCond_Always);
-            ImGui::Begin("OpenGL Window");
-            ImGui::SliderFloat("glWindowPosition.x", &glWindowPosition.x, 0, mainWindowWidth);
-            ImGui::SliderFloat("glWindowPosition.y", &glWindowPosition.y, 0, mainWindowHeight);
-            ImGui::SliderFloat("glWindowSize.x", &glWindowSize.x, 0, mainWindowWidth);
-            ImGui::SliderFloat("glWindowSize.y", &glWindowSize.y, 0, mainWindowHeight);
-            ImGui::SliderFloat("frameBufferSize.x", &frameBufferSize.x, 0, mainWindowHeight);
-            ImGui::SliderFloat("frameBufferSize.y", &frameBufferSize.y, 0, mainWindowHeight);
-            ImGui::SliderInt("camera.width", &camera.width, 0, mainWindowHeight);
-            ImGui::SliderInt("camera.height", &camera.height, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Orientation.x", &camera.Orientation.x, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Orientation.y", &camera.Orientation.y, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Orientation.z", &camera.Orientation.z, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Position.x", &camera.Position.x, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Position.y", &camera.Position.y, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Position.z", &camera.Position.z, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Up.x", &camera.Up.x, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Up.y", &camera.Up.y, 0, mainWindowHeight);
-            ImGui::SliderFloat("camera.Up.z", &camera.Up.z, 0, mainWindowHeight);
-            ImGui::End();
-
-            // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-            if (show_demo_window) {
-                ImGui::ShowDemoWindow(&show_demo_window);
-            }
 
             // Rendering
             ImGui::Render();
