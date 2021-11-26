@@ -319,9 +319,9 @@ int main(){
         glEnable(GL_DEPTH_TEST);
         // Creates camera object
         Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(-2.140f, 0.0, 5.649f));
-        camera.Orientation.x = 0.650f;
-        camera.Orientation.y = 0.493f;
-        camera.Orientation.z = -0.596f;
+        camera.Orientation.x = 0.668f;
+        camera.Orientation.y = 0.239f;
+        camera.Orientation.z = -0.720f;
 
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -353,9 +353,25 @@ int main(){
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+            if (ImGui::BeginMainMenuBar()){
+                if (ImGui::BeginMenu("File")){
+                    if (ImGui::MenuItem("Open")){
+                        //Do something
+                    }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Graph")){
+                    if (ImGui::MenuItem("Something")){
+                        //Do something
+                    }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMainMenuBar();
+            }
+
             // Stats window
             ImGui::SetNextWindowPos( ImVec2(0,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(350, 70), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(250, 70), ImGuiCond_Always);
             ImGui::Begin("Stats");
             ImGui::Text(" %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             // Stores the coordinates of the cursor
@@ -372,25 +388,39 @@ int main(){
             }
 
             // Camera window
-            ImGui::SetNextWindowPos( ImVec2(0,70), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(350, 300), ImGuiCond_Always);
+            ImGui::SetNextWindowPos( ImVec2(0,90), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(250, 340), ImGuiCond_Always);
             ImGui::Begin("Camera");
             ImGui::SliderInt("Width", &camera.width, 0, mainWindowHeight);
             ImGui::SliderInt("Height", &camera.height, 0, mainWindowHeight);
-            ImGui::SliderFloat("Orientation - X", &camera.Orientation.x, -10, 10);
-            ImGui::SliderFloat("Orientation - Y", &camera.Orientation.y, -10, 10);
-            ImGui::SliderFloat("Orientation - Z", &camera.Orientation.z, -10, 10);
-            ImGui::SliderFloat("Position - X", &camera.Position.x, -10, 10);
-            ImGui::SliderFloat("Position - Y", &camera.Position.y, 0, 10);
-            ImGui::SliderFloat("Position - Z", &camera.Position.z, -10, 10);
-            ImGui::SliderFloat("Up - X", &camera.Up.x, -10, 10);
-            ImGui::SliderFloat("Up - Y", &camera.Up.y, -10, 10);
-            ImGui::SliderFloat("Up - Z", &camera.Up.z, -10, 10);
+            ImGui::SliderFloat("Orient-X", &camera.Orientation.x, -10, 10);
+            ImGui::SliderFloat("Orient-Y", &camera.Orientation.y, -10, 10);
+            ImGui::SliderFloat("Orient-Z", &camera.Orientation.z, -10, 10);
+            ImGui::SliderFloat("Pos-X", &camera.Position.x, -10, 10);
+            ImGui::SliderFloat("Pos-Y", &camera.Position.y, 0, 10);
+            ImGui::SliderFloat("Pos-Z", &camera.Position.z, -10, 10);
+            ImGui::SliderFloat("Up-X", &camera.Up.x, -10, 10);
+            ImGui::SliderFloat("Up-Y", &camera.Up.y, -10, 10);
+            ImGui::SliderFloat("Up-Z", &camera.Up.z, -10, 10);
+            ImGui::SliderFloat("Speed", &camera.speed, -10, 10);
+            ImGui::SliderFloat("Sense", &camera.sensitivity, -10, 10);
+            ImGui::End();
+
+            // Player window
+            ImGui::SetNextWindowPos( ImVec2(0,430), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(250, 270), ImGuiCond_Always);
+            ImGui::Begin("Player");
+            ImGui::End();
+
+            // Map window
+            ImGui::SetNextWindowPos( ImVec2(0,700), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(250, mainWindowHeight-700), ImGuiCond_Always);
+            ImGui::Begin("Map");
             ImGui::End();
 
             // OpenGL window
-            ImGui::SetNextWindowPos( ImVec2(460,100), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(glWindowSize.x, glWindowSize.y), ImGuiCond_Once);
+            ImGui::SetNextWindowPos( ImVec2(250,0), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(mainWindowWidth-250, mainWindowHeight), ImGuiCond_Once);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             ImGui::PopStyleVar();
