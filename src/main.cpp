@@ -35,7 +35,7 @@ namespace fs = std::filesystem;
 #include "Camera.h"
 
 const int FPS = 60.0f;
-const char* glsl_version;
+const char* GLSL_VERSION;
 unsigned int mainWindowWidth = 1300;
 unsigned int mainWindowHeight = 860;
 
@@ -47,8 +47,6 @@ unsigned int textureColorBuffer;
 ImVec2 glWindowSize = ImVec2(600, 400);
 ImVec2 frameBufferSize = ImVec2(glWindowSize.x, glWindowSize.y);
 ImVec2 glWindowPosition;
-ImVec4 glWindowCoordinates;
-
 
 
 // Vertices coordinates
@@ -115,24 +113,19 @@ GLuint lightIndices[] =
                 4, 6, 7
         };
 
-static void glfwErrorCallback(int error, const char* description)
-{
+static void glfwErrorCallback(int error, const char* description){
     spdlog::error("Glfw Error {}: {}\n", error, description);
 }
 
 static void windowResizeCallback(GLFWwindow* window, int newWidth, int newHeight){
-//
 //    glfwGetFramebufferSize(window, &newWidth, &newHeight);
 //    float newAspect = (float)newWidth / (float)newHeight;
-//    mainWindowWidth = newWidth;
-//    mainWindowHeight = newHeight;
 //    perspectiveMatrix = glm::perspective(1.0472f, newAspect, 0.1f, 1000.0f);
 //    glViewport(0, 0, newWidth, newHeight);
     spdlog::info("window resized");
 }
 
 static void windowMoveCallback(GLFWwindow* window, int newWidth, int newHeight){
-//    glViewport(0, 0, newWidth, newHeight);
     spdlog::info("window moved");
 }
 
@@ -146,7 +139,7 @@ void glslSetup(){
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(__APPLE__)
     // GL 3.2 + GLSL 150
-    glsl_version = "#version 150";
+    GLSL_VERSION = "#version 150";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
@@ -226,8 +219,7 @@ void display(auto &window, auto &camera, auto &shaderProgram, auto &brickTex, au
 }
 
 
-int main()
-{
+int main(){
     try {
         // Initialize GLFW
         // Setup window
@@ -330,7 +322,6 @@ int main()
         camera.Orientation.x = 0.650f;
         camera.Orientation.y = 0.493f;
         camera.Orientation.z = -0.596f;
-//        frameBufferSize = ImVec2(glWindowSize.x, glWindowSize.y);
 
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -344,7 +335,7 @@ int main()
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init(glsl_version);
+        ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 
         // Our state
         bool show_demo_window = true;
@@ -461,8 +452,6 @@ int main()
             }
             lastTime += 1.0 / FPS;
         }
-
-
 
         // Delete all the objects we've created
         VAO1.Delete();
