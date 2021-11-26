@@ -53,25 +53,25 @@ ImVec2 glWindowPosition;
 GLfloat vertices[] =
         { //     COORDINATES        /        COLORS          /    TexCoord   /        NORMALS       //
                 -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
-                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
-                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    5.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    5.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 2.5f,      0.0f, -1.0f, 0.0f, // Bottom side
+                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    2.5f, 2.5f,      0.0f, -1.0f, 0.0f, // Bottom side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    2.5f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
 
                 -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
-                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    5.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    2.5f, 5.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    2.5f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.25f, 2.5f,     -0.8f, 0.5f,  0.0f, // Left Side
 
-                -0.5f, 0.0f, -0.5f,    0.83f, 0.70f, 0.44f,	    5.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                -0.5f, 0.0f, -0.5f,    0.83f, 0.70f, 0.44f,	    2.5f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
                 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    2.5f, 5.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.25f, 2.5f,      0.0f, 0.5f, -0.8f, // Non-facing side
 
                 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    5.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    2.5f, 5.0f,      0.8f, 0.5f,  0.0f, // Right side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    2.5f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.25f, 2.5f,      0.8f, 0.5f,  0.0f, // Right side
 
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    5.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    2.5f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
                 -0.5f, 0.0f,  0.5f,    0.83f, 0.70f, 0.44f,     0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    2.5f, 5.0f,      0.0f, 0.5f,  0.8f  // Facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.25f, 2.5f,      0.0f, 0.5f,  0.8f  // Facing side
         };
 
 // Indices for vertices order
@@ -312,8 +312,8 @@ int main(){
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
         // Texture
-        Texture guybrush("../src/include/preconcrete_wall_001_long_diff.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-        guybrush.texUnit(shaderProgram, "tex0", 0);
+        Texture firstTexture("../src/include/sample_texture.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+        firstTexture.texUnit(shaderProgram, "tex0", 0);
 
         // Enables the Depth Buffer
         glEnable(GL_DEPTH_TEST);
@@ -407,7 +407,7 @@ int main(){
             frameBufferSize.y = glWindowSize.y;
             // Specify the viewport of OpenGL in the Window
             // In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
-//            glViewport(0, 0, glWindowSize.x, glWindowSize.y);
+            // glViewport(0, 0, glWindowSize.x, glWindowSize.y);
             try {
                 glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameBufferSize.x, frameBufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
@@ -424,7 +424,7 @@ int main(){
                 glClear(GL_FRAMEBUFFER);
                 glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
 
-                display(window, camera, shaderProgram, guybrush, VAO1, lightShader, lightVAO, ImGui::IsWindowFocused());
+                display(window, camera, shaderProgram, firstTexture, VAO1, lightShader, lightVAO, ImGui::IsWindowFocused());
 
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 // TODO: Hard-coded texture ID
@@ -457,7 +457,7 @@ int main(){
         VAO1.Delete();
         VBO1.Delete();
         EBO1.Delete();
-        guybrush.Delete();
+        firstTexture.Delete();
         shaderProgram.Delete();
         lightVAO.Delete();
         lightVBO.Delete();
