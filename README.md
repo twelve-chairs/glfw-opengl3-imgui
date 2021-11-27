@@ -8,4 +8,3 @@ MacOS, CMake, Conan, GLFW, OpenGL, ImGUI.
 Based heavily on this amazing tutorial: https://github.com/VictorGordan/opengl-tutorials
 
 ![](Screen%20Shot%202021-11-26%20at%2020.47.19.png)
-![](macos-opengl-imgui.gif)
