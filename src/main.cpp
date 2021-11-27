@@ -69,9 +69,9 @@ GLfloat vertices[] =
                 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
                 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.0f,      0.8f, 0.5f,  0.0f, // Right side
 
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    1.00f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
                 -0.5f, 0.0f,  0.5f,    0.83f, 0.70f, 0.44f,     0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.25f,      0.0f, 0.5f,  0.8f  // Facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    0.75f, 1.0f,      0.0f, 0.5f,  0.8f  // Facing side
         };
 
 // Indices for vertices order
