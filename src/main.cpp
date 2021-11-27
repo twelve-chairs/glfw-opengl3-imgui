@@ -418,16 +418,14 @@ int main(){
 
             // Map window
             ImGui::SetNextWindowPos( ImVec2(0,720), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(250, mainWindowHeight-720), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(250, mainWindowHeight - 720), ImGuiCond_Always);
             ImGui::Begin("Map");
             ImGui::End();
 
             // OpenGL window
             ImGui::SetNextWindowPos( ImVec2(250,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(mainWindowWidth-250, mainWindowHeight), ImGuiCond_Once);
-//            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+            ImGui::SetNextWindowSize(ImVec2(mainWindowWidth - 250, mainWindowHeight - 20), ImGuiCond_Once);
             ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-//            ImGui::PopStyleVar();
             ImGui::BeginChild("Render");
             glWindowSize = ImGui::GetContentRegionAvail();
             glWindowPosition = ImGui::GetWindowPos();

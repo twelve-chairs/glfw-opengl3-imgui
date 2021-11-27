@@ -42,8 +42,8 @@ void Camera::relevelView(){
 }
 
 void Camera::resetView(){
-    Position = glm::vec3(-0.931f, 0.803f, 4.174f);
-    Orientation = glm::vec3(0.597f, 0.016f, -0.816f);
+    Orientation = glm::vec3(0.553, 0.270f, -0.844f);
+    Position = glm::vec3(-0.931f, 0.0f, 4.174f);
 }
 
 
