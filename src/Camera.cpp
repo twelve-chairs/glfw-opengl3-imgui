@@ -35,48 +35,50 @@ void Camera::scrollCallback(){
 
 }
 
+void Camera::resetView(){
+    if (Position.y < 0.5){
+        Position.y = 0.5;
+        Orientation.x = 0.0;
+        Orientation.y = 0.5;
+        Orientation.z = 0.0;
+    }
+}
+
 void Camera::Inputs(GLFWwindow* window, ImVec2 glWindowPosition, ImVec2 glWindowSize)
 {
     ImVec4 glWindowCoordinates = ImVec4(glWindowPosition.x, glWindowPosition.y, glWindowPosition.x + glWindowSize.x, glWindowPosition.y + glWindowSize.y);
     // Handles key inputs
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
         Position += speed * Orientation;
-        if (Position.y < 0){
-            Position.y = 0;
-        }
     }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
         Position += speed * -glm::normalize(glm::cross(Orientation, Up));
     }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    {
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
         Position += speed * -Orientation;
-        if (Position.y < 0){
-            Position.y = 0;
-        }
     }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    {
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
         Position += speed * glm::normalize(glm::cross(Orientation, Up));
     }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-    {
-        Position += speed * Up;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-    {
-        Position += speed * -Up;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-    {
-        speed = 0.4f;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
-    {
-        speed = 0.1f;
-    }
+
+    resetView();
+
+//    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+//    {
+//        Position += speed * Up;
+//    }
+//    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+//    {
+//        Position += speed * -Up;
+//    }
+//    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+//    {
+//        speed = 0.4f;
+//    }
+//    else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+//    {
+//        speed = 0.1f;
+//    }
 
 
     // Handles mouse inputs

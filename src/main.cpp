@@ -318,7 +318,7 @@ int main(){
         // Enables the Depth Buffer
         glEnable(GL_DEPTH_TEST);
         // Creates camera object
-        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(-2.140f, 0.0, 5.649f));
+        Camera camera(glWindowSize.x, glWindowSize.y, glm::vec3(-2.140f, 0.6, 5.649f));
         camera.Orientation.x = 0.668f;
         camera.Orientation.y = 0.239f;
         camera.Orientation.z = -0.720f;

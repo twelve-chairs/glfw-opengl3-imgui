@@ -47,5 +47,7 @@ public:
 
     void reset();
     void scrollCallback();
+
+    void resetView();
 };
 #endif
