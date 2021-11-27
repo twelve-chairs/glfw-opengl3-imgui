@@ -33,7 +33,7 @@ public:
 
     // Adjust the speed of the camera and it's sensitivity when looking around
     float speed = 0.1f;
-    float sensitivity = 0.6f;
+    float sensitivity = 0.135f;
 
     // Camera constructor to set up initial values
     Camera(int width, int height, glm::vec3 position);
@@ -49,5 +49,7 @@ public:
     void scrollCallback();
 
     void resetView();
+
+    void relevelView();
 };
 #endif

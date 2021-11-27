@@ -35,14 +35,17 @@ void Camera::scrollCallback(){
 
 }
 
-void Camera::resetView(){
+void Camera::relevelView(){
     if (Position.y < 0.5){
         Position.y = 0.5;
-        Orientation.x = 0.0;
-        Orientation.y = 0.5;
-        Orientation.z = 0.0;
     }
 }
+
+void Camera::resetView(){
+    Position = glm::vec3(-0.931f, 0.803f, 4.174f);
+    Orientation = glm::vec3(0.597f, 0.016f, -0.816f);
+}
+
 
 void Camera::Inputs(GLFWwindow* window, ImVec2 glWindowPosition, ImVec2 glWindowSize)
 {
@@ -61,7 +64,7 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 glWindowPosition, ImVec2 glWindow
         Position += speed * glm::normalize(glm::cross(Orientation, Up));
     }
 
-    resetView();
+    relevelView();
 
 //    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 //    {
