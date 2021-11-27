@@ -38,6 +38,7 @@ void Camera::scrollCallback(){
 void Camera::relevelView(){
     if (Position.y < 0.0){
         Position.y = 0.0;
+//        Orientation.y = 0.0;
     }
 }
 

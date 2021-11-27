@@ -53,25 +53,25 @@ ImVec2 glWindowPosition;
 GLfloat vertices[] =
         { //     COORDINATES        /        COLORS          /    TexCoord   /        NORMALS       //
                 -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
-                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 2.5f,      0.0f, -1.0f, 0.0f, // Bottom side
-                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    2.5f, 2.5f,      0.0f, -1.0f, 0.0f, // Bottom side
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    2.5f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 1.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    1.0f, 1.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
 
                 -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
-                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    2.5f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.25f, 2.5f,     -0.8f, 0.5f,  0.0f, // Left Side
+                -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    1.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.0f,     -0.8f, 0.5f,  0.0f, // Left Side
 
-                -0.5f, 0.0f, -0.5f,    0.83f, 0.70f, 0.44f,	    2.5f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                -0.5f, 0.0f, -0.5f,    0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
                 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.25f, 2.5f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
 
                 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    2.5f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.25f, 2.5f,      0.8f, 0.5f,  0.0f, // Right side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.0f,      0.8f, 0.5f,  0.0f, // Right side
 
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    2.5f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
                 -0.5f, 0.0f,  0.5f,    0.83f, 0.70f, 0.44f,     0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.25f, 2.5f,      0.0f, 0.5f,  0.8f  // Facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.25f,      0.0f, 0.5f,  0.8f  // Facing side
         };
 
 // Indices for vertices order
@@ -336,7 +336,7 @@ int main(){
         ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 
         // Our state
-        bool show_demo_window = true;
+        bool show_demo_window = false;
         auto mainBackgroundColor = ImVec4(0.01f, 0.01f, 0.01f, 1.00f);
 
         initFrameBuffer();
@@ -400,8 +400,8 @@ int main(){
             ImGui::SliderFloat("Up-X", &camera.Up.x, -10, 10);
             ImGui::SliderFloat("Up-Y", &camera.Up.y, -10, 10);
             ImGui::SliderFloat("Up-Z", &camera.Up.z, -10, 10);
-            ImGui::SliderFloat("Speed", &camera.speed, -10, 10);
-            ImGui::SliderFloat("Sense", &camera.sensitivity, -10, 10);
+            ImGui::SliderFloat("Speed", &camera.speed, 0, 1);
+            ImGui::SliderFloat("Sense", &camera.sensitivity, 0, 1);
             if (ImGui::Button("User / World")){
                 //... my_code
             }
