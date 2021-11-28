@@ -45,7 +45,7 @@ unsigned int textureColorBuffer;
 
 // OpenGL window default size and position
 ImVec2 glWindowSize = ImVec2(600, 400);
-ImVec2 frameBufferSize = ImVec2(glWindowSize.x, glWindowSize.y);
+ImVec2 frameBufferSize = glWindowSize;
 ImVec2 glWindowPosition;
 
 
@@ -243,11 +243,6 @@ int main(){
         glfwSetWindowSizeCallback(window, windowResizeCallback);
         glfwSetWindowPosCallback(window, windowMoveCallback);
 
-        if (glewInit() != GLEW_OK){
-            spdlog::error("glewInit");
-            return 1;
-        }
-
         glfwSwapInterval(1); // Enable vsync
 
         // Introduce the window into the current context
@@ -356,6 +351,9 @@ int main(){
                     if (ImGui::MenuItem("Open")){
                         //Do something
                     }
+                    if (ImGui::MenuItem("Exit")){
+                        //Do something
+                    }
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Graph")){
@@ -413,7 +411,7 @@ int main(){
             // Player window
             ImGui::SetNextWindowPos( ImVec2(0,470), ImGuiCond_Once);
             ImGui::SetNextWindowSize(ImVec2(250, 250), ImGuiCond_Always);
-            ImGui::Begin("Player");
+            ImGui::Begin("Light");
             ImGui::End();
 
             // Map window
@@ -424,7 +422,7 @@ int main(){
 
             // OpenGL window
             ImGui::SetNextWindowPos( ImVec2(250,0), ImGuiCond_Once);
-            ImGui::SetNextWindowSize(ImVec2(mainWindowWidth - 250, mainWindowHeight - 20), ImGuiCond_Once);
+            ImGui::SetNextWindowSize(ImVec2(mainWindowWidth - 250, mainWindowHeight - 19), ImGuiCond_Once);
             ImGui::Begin("OpenGL");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             ImGui::BeginChild("Render");
             glWindowSize = ImGui::GetContentRegionAvail();

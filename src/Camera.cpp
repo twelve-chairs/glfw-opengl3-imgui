@@ -31,9 +31,7 @@ void Camera::Matrix(Shader& shader, const char* uniform)
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 }
 
-void Camera::scrollCallback(){
-
-}
+void Camera::scrollCallback(){}
 
 void Camera::relevelView(){
     if (Position.y < 0.0 ){
@@ -68,24 +66,6 @@ void Camera::Inputs(GLFWwindow* window, ImVec2 glWindowPosition, ImVec2 glWindow
     }
 
     relevelView();
-
-//    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-//    {
-//        Position += speed * Up;
-//    }
-//    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-//    {
-//        Position += speed * -Up;
-//    }
-//    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-//    {
-//        speed = 0.4f;
-//    }
-//    else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
-//    {
-//        speed = 0.1f;
-//    }
-
 
     // Handles mouse inputs
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
