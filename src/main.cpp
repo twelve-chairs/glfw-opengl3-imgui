@@ -183,7 +183,7 @@ GLuint initFrameBuffer(){
 
 void display(auto &window, auto &camera, auto &shaderProgram, auto &brickTex, auto &VAO1, auto &lightShader, auto &lightVAO, bool isWindowFocused){
     // Specify the color of the background
-    glClearColor(0.06f, 0.06f, 0.06f, 0.3f);
+    glClearColor(0.05f, 0.05f, 0.05f, 0.3f);
     // Clean the back buffer and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
