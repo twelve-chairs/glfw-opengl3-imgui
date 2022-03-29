@@ -1,6 +1,8 @@
 #include"Camera.h"
 
-
+glm::vec2 lastMousePosition = glm::vec2(0.0f, 0.0f);
+float lastMouseUpdate = 0.0f;
+float maxAngle = 90.0f;
 
 Camera::Camera(int width, int height, glm::vec3 position){
     Camera::width = width;
