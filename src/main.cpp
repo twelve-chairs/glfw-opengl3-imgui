@@ -24,7 +24,6 @@ namespace fs = std::filesystem;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <unistd.h>
-#include <mikmod.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "Texture.h"
@@ -48,9 +47,27 @@ ImVec2 glWindowSize = ImVec2(600, 400);
 ImVec2 frameBufferSize = glWindowSize;
 ImVec2 glWindowPosition;
 
+static float tx1 = 0.0f;
+static float tx2 = 0.0f;
+static float tx3 = 0.0f;
+static float tx4 = 0.0f;
+static float tx5 = 0.0f;
+static float tx6 = 0.25f;
+
 
 // Vertices coordinates
-GLfloat vertices[] =
+static float planeVertices[18] =
+        {
+        -128.0f, 0.0f, -128.0f, -128.0f, 0.0f, 128.0f, 128.0f, 0.0f, -128.0f,
+        128.0f, 0.0f, -128.0f, -128.0f, 0.0f, 128.0f, 128.0f, 0.0f, 128.0f
+};
+static float planeCoordinates[12] = {
+        0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f
+};
+
+
+static GLfloat pyramidVertices[] =
         { //     COORDINATES        /        COLORS          /    TexCoord   /        NORMALS       //
                 -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
                 -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    0.0f, 1.0f,      0.0f, -1.0f, 0.0f, // Bottom side
@@ -61,21 +78,21 @@ GLfloat vertices[] =
                 -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,    1.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
                 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.0f,     -0.8f, 0.5f,  0.0f, // Left Side
 
-                -0.5f, 0.0f, -0.5f,    0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
-                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                -0.5f, 0.0f, -0.5f,    0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    0.5f, 1.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
 
                 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
                 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    1.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    1.0f, 1.0f,      0.8f, 0.5f,  0.0f, // Right side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    0.5f, 1.0f,      0.8f, 0.5f,  0.0f, // Right side
 
-                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    1.00f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
-                -0.5f, 0.0f,  0.5f,    0.83f, 0.70f, 0.44f,     0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
-                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    0.75f, 1.0f,      0.0f, 0.5f,  0.8f  // Facing side
+                0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	    0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+                -0.5f, 0.0f,  0.5f,    0.83f, 0.70f, 0.44f,     1.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+                0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	    0.5f, 1.0f,      0.0f, 0.5f,  0.8f  // Facing side
         };
 
-// Indices for vertices order
-GLuint indices[] =
+// Indices for pyramidVertices order
+static GLuint indices[] =
         {
                 0, 1, 2, // Bottom side
                 0, 2, 3, // Bottom side
@@ -85,7 +102,7 @@ GLuint indices[] =
                 13, 15, 14 // Facing side
         };
 
-GLfloat lightVertices[] =
+static GLfloat lightVertices[] =
         { //     COORDINATES     //
                 -0.1f, -0.1f,  0.1f,
                 -0.1f, -0.1f, -0.1f,
@@ -97,7 +114,7 @@ GLfloat lightVertices[] =
                 0.1f,  0.1f,  0.1f
         };
 
-GLuint lightIndices[] =
+static GLuint lightIndices[] =
         {
                 0, 1, 2,
                 0, 2, 3,
@@ -125,6 +142,10 @@ static void windowResizeCallback(GLFWwindow* window, int newWidth, int newHeight
     spdlog::info("window resized");
 }
 
+static void framebufferSizeCallback(GLFWwindow* window, int width, int height){
+    glViewport(0, 0, width, height);
+}
+
 static void windowMoveCallback(GLFWwindow* window, int newWidth, int newHeight){
     spdlog::info("window moved");
 }
@@ -139,9 +160,9 @@ void glslSetup(){
         glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(__APPLE__)
     // GL 3.2 + GLSL 150
-    GLSL_VERSION = "#version 150";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    GLSL_VERSION = "#version 410";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
@@ -181,7 +202,7 @@ GLuint initFrameBuffer(){
     return frameBufferObject;
 }
 
-void display(auto &window, auto &camera, auto &shaderProgram, auto &brickTex, auto &VAO1, auto &lightShader, auto &lightVAO, bool isWindowFocused){
+void display(auto &window, auto &camera, auto &shaderProgram, auto &texture, auto &VAO1, auto &lightShader, auto &lightVAO, bool isWindowFocused){
     // Specify the color of the background
     glClearColor(0.05f, 0.05f, 0.05f, 0.3f);
     // Clean the back buffer and depth buffer
@@ -192,8 +213,7 @@ void display(auto &window, auto &camera, auto &shaderProgram, auto &brickTex, au
         camera.Inputs(window, glWindowPosition, glWindowSize);
     }
     // Updates and exports the camera matrix to the Vertex Shader
-    camera.updateMatrix(45.0f, 0.1f, 100.0f);
-
+    camera.updateMatrix(45.0f, 0.2f, 100.0f);
 
     // Tells OpenGL which Shader Program we want to use
     shaderProgram.Activate();
@@ -202,7 +222,7 @@ void display(auto &window, auto &camera, auto &shaderProgram, auto &brickTex, au
     // Export the camMatrix to the Vertex Shader of the pyramid
     camera.Matrix(shaderProgram, "camMatrix");
     // Binds texture so that is appears in rendering
-    brickTex.Bind();
+    texture.Bind();
     // Bind the VAO so OpenGL knows to use it
     VAO1.Bind();
     // Draw primitives, number of indices, datatype of indices, index of indices
@@ -218,7 +238,6 @@ void display(auto &window, auto &camera, auto &shaderProgram, auto &brickTex, au
     glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
 }
 
-
 int main(){
     try {
         // Initialize GLFW
@@ -232,7 +251,13 @@ int main(){
         glslSetup();
 
         // Create window with graphics context
-        GLFWwindow* window = glfwCreateWindow(mainWindowWidth, mainWindowHeight, "glfw-opengl3-imgui", nullptr, nullptr);
+        GLFWmonitor* monitor =  glfwGetPrimaryMonitor(); // The primary monitor.. Later Occulus?..
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        mainWindowWidth = mode->width;
+        mainWindowHeight = mode->height;
+
+        GLFWwindow* window = glfwCreateWindow(mainWindowWidth,mainWindowHeight, "glfw-opengl-imgui", monitor, nullptr);
         if (window == nullptr) {
             spdlog::error("glfwCreateWindow");
             return 1;
@@ -242,6 +267,7 @@ int main(){
 //        glfwSetScrollCallback(window, scroll_callback);
         glfwSetWindowSizeCallback(window, windowResizeCallback);
         glfwSetWindowPosCallback(window, windowMoveCallback);
+        glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
         glfwSwapInterval(1); // Enable vsync
 
@@ -258,8 +284,8 @@ int main(){
         // Generates Vertex Array Object and binds it
         VAO VAO1;
         VAO1.Bind();
-        // Generates Vertex Buffer Object and links it to vertices
-        VBO VBO1(vertices, sizeof(vertices));
+        // Generates Vertex Buffer Object and links it to pyramidVertices
+        VBO VBO1(pyramidVertices, sizeof(pyramidVertices));
         // Generates Element Buffer Object and links it to indices
         EBO EBO1(indices, sizeof(indices));
         // Links VBO attributes such as coordinates and colors to VAO
@@ -277,7 +303,7 @@ int main(){
         // Generates Vertex Array Object and binds it
         VAO lightVAO;
         lightVAO.Bind();
-        // Generates Vertex Buffer Object and links it to vertices
+        // Generates Vertex Buffer Object and links it to lightVertices
         VBO lightVBO(lightVertices, sizeof(lightVertices));
         // Generates Element Buffer Object and links it to indices
         EBO lightEBO(lightIndices, sizeof(lightIndices));
@@ -297,12 +323,16 @@ int main(){
         glm::mat4 pyramidModel = glm::mat4(1.0f);
         pyramidModel = glm::translate(pyramidModel, pyramidPos);
 
+        glm::vec3 pyramidPos2 = glm::vec3(2.0f, 1.0f, 0.0f);
+        glm::mat4 pyramidModel2 = glm::mat4(1.0f);
+        pyramidModel2 = glm::translate(pyramidModel2, pyramidPos2);
 
         lightShader.Activate();
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
         glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
         shaderProgram.Activate();
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(pyramidModel));
+//        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(pyramidModel2));
         glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
         glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
@@ -352,7 +382,27 @@ int main(){
                         //Do something
                     }
                     if (ImGui::MenuItem("Exit")){
-                        //Do something
+                        // Delete all the objects we've created
+                        VAO1.Delete();
+                        VBO1.Delete();
+                        EBO1.Delete();
+                        firstTexture.Delete();
+                        shaderProgram.Delete();
+                        lightVAO.Delete();
+                        lightVBO.Delete();
+                        lightEBO.Delete();
+                        lightShader.Delete();
+
+                        ImGui_ImplOpenGL3_Shutdown();
+                        ImGui_ImplGlfw_Shutdown();
+                        ImGui::DestroyContext();
+
+                        // Delete window before ending the program
+                        glfwDestroyWindow(window);
+                        // Terminate GLFW before ending the program
+                        glfwTerminate();
+                        return 0;
+
                     }
                     ImGui::EndMenu();
                 }
@@ -399,7 +449,7 @@ int main(){
             ImGui::SliderFloat("Up-Y", &camera.Up.y, -10, 10);
             ImGui::SliderFloat("Up-Z", &camera.Up.z, -10, 10);
             ImGui::SliderFloat("Speed", &camera.speed, 0, 1);
-            ImGui::SliderFloat("Sense", &camera.sensitivity, 0, 1);
+            ImGui::SliderFloat("Sense", &camera.sensitivity, 0, 2);
             if (ImGui::Button("User / World")){
                 //... my_code
             }
@@ -408,10 +458,16 @@ int main(){
             }
             ImGui::End();
 
-            // Player window
+            // Light window
             ImGui::SetNextWindowPos( ImVec2(0,470), ImGuiCond_Once);
             ImGui::SetNextWindowSize(ImVec2(250, 250), ImGuiCond_Always);
             ImGui::Begin("Light");
+            ImGui::SliderFloat("tx1", &tx1, -1, 1);
+            ImGui::SliderFloat("tx2", &tx2, -1, 1);
+            ImGui::SliderFloat("tx3", &tx3, -1, 1);
+            ImGui::SliderFloat("tx4", &tx4, -1, 1);
+            ImGui::SliderFloat("tx5", &tx5, -1, 1);
+            ImGui::SliderFloat("tx6", &tx6, -1, 1);
             ImGui::End();
 
             // Map window
@@ -431,11 +487,11 @@ int main(){
             frameBufferSize.y = glWindowSize.y;
             // Specify the viewport of OpenGL in the Window
             // In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
-            // glViewport(0, 0, glWindowSize.x, glWindowSize.y);
+//             glViewport(0, 0, glWindowSize.x, glWindowSize.y);
             try {
                 glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameBufferSize.x, frameBufferSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -466,7 +522,6 @@ int main(){
             glClearColor(mainBackgroundColor.x, mainBackgroundColor.y, mainBackgroundColor.z, 1);
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-//            glViewport(0, 0, glWindowSize.x, glWindowSize.y);
 
             glfwSwapBuffers(window);
 
