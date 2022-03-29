@@ -527,7 +527,7 @@ int main(){
 
             // Limit to n FPS
             while (glfwGetTime() < lastTime + 1.0 / FPS) {
-                pthread_yield_np();
+//                pthread_yield_np();
             }
             lastTime += 1.0 / FPS;
         }
